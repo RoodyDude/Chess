@@ -8,23 +8,23 @@ end
 class Board
     attr_accessor :board
     def initialize
-        @board = create_board()
+        @grid = create_board()
     end
 
     def create_board
         x = 0
         y = 0
         z = " "
-        board = []
+        grid = []
         while y < 8 do
             x = 0
             while x < 8 do
-                board.append([x,y,z])
+                grid.append([x,y,z])
                 x += 1
             end
             y += 1
         end
-        board
+        grid
     end
 end
 
