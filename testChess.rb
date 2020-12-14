@@ -43,6 +43,30 @@ class GamePiece
     end
 end
 
+class Pawn < GamePiece
+
+end
+
+class Rook < GamePiece
+
+end
+
+class Knight < GamePiece
+
+end
+
+class Bishop < GamePiece
+
+end
+
+class Queen < GamePiece
+
+end
+
+class King < GamePiece
+
+end
+
 class Board
     attr_accessor :grid
     def initialize
@@ -69,6 +93,7 @@ end
 class Game
     def initialize
         @game_board = Board.new
+        self.populate_board
     end
 
     def populate_board
@@ -79,33 +104,33 @@ class Game
     def place_black_pieces
         x = 48
         while x < 56 do
-            @game_board.grid[x][2] = GamePiece.new("pawn", "black")
+            @game_board.grid[x][2] = Pawn.new("pawn", "black")
             x+=1
         end
-        @game_board.grid[56][2] = GamePiece.new("rook", "black")
-        @game_board.grid[63][2] = GamePiece.new("rook", "black")
-        @game_board.grid[57][2] = GamePiece.new("knight", "black")
-        @game_board.grid[62][2] = GamePiece.new("knight", "black")
-        @game_board.grid[58][2] = GamePiece.new("bishop", "black")
-        @game_board.grid[61][2] = GamePiece.new("bishop", "black")
-        @game_board.grid[59][2] = GamePiece.new("queen", "black")
-        @game_board.grid[60][2] = GamePiece.new("king", "black")
+        @game_board.grid[56][2] = Rook.new("rook", "black")
+        @game_board.grid[63][2] = Rook.new("rook", "black")
+        @game_board.grid[57][2] = Knight.new("knight", "black")
+        @game_board.grid[62][2] = Knight.new("knight", "black")
+        @game_board.grid[58][2] = Bishop.new("bishop", "black")
+        @game_board.grid[61][2] = Bishop.new("bishop", "black")
+        @game_board.grid[59][2] = Queen.new("queen", "black")
+        @game_board.grid[60][2] = King.new("king", "black")
     end
 
     def place_white_pieces
         x = 8
         while x < 16 do
-            @game_board.grid[x][2] = GamePiece.new("pawn", "white")
+            @game_board.grid[x][2] = Pawn.new("pawn", "white")
             x+=1
         end
-        @game_board.grid[0][2] = GamePiece.new("rook", "white")
-        @game_board.grid[7][2] = GamePiece.new("rook", "white")
-        @game_board.grid[1][2] = GamePiece.new("knight", "white")
-        @game_board.grid[6][2] = GamePiece.new("knight", "white")
-        @game_board.grid[2][2] = GamePiece.new("bishop", "white")
-        @game_board.grid[5][2] = GamePiece.new("bishop", "white")
-        @game_board.grid[3][2] = GamePiece.new("queen", "white")
-        @game_board.grid[4][2] = GamePiece.new("king", "white")
+        @game_board.grid[0][2] = Rook.new("rook", "white")
+        @game_board.grid[7][2] = Rook.new("rook", "white")
+        @game_board.grid[1][2] = Knight.new("knight", "white")
+        @game_board.grid[6][2] = Knight.new("knight", "white")
+        @game_board.grid[2][2] = Bishop.new("bishop", "white")
+        @game_board.grid[5][2] = Bishop.new("bishop", "white")
+        @game_board.grid[3][2] = Queen.new("queen", "white")
+        @game_board.grid[4][2] = King.new("king", "white")
     end
 
     def display_board
@@ -130,7 +155,3 @@ class Game
 end
 game = Game.new
 game.display_board
-game.place_black_pieces
-game.place_white_pieces
-game.display_board
-#puts "\u2654"
