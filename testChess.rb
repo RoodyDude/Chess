@@ -7,64 +7,66 @@ class GamePiece
         @type = type
         @color = color
     end
-    
+end
+
+class Pawn < GamePiece
     def to_s
         if @color == "black"
-            case @type
-            when "pawn"
-                return "\u265F"
-            when "rook"
-                return "\u265C"
-            when "knight"
-                return "\u265E"
-            when "bishop"
-                return "\u265D"
-            when "queen"
-                return "\u265B"
-            when "king"
-                return "\u265A"
-            end
-        else
-            case @type
-            when "pawn"
-                return "\u2659"
-            when "rook"
-                return "\u2656"
-            when "knight"
-                return "\u2658"
-            when "bishop"
-                return "\u2657"
-            when "queen"
-                return "\u2655"
-            when "king"
-                return "\u2654"
-            end
+            return "\u265F"
+        else 
+            return "\u2659"
         end
     end
 end
 
-class Pawn < GamePiece
-
-end
-
 class Rook < GamePiece
-
+    def to_s
+        if @color == "black"
+            return "\u265C"
+        else
+            return "\u2656"
+        end
+    end
 end
 
 class Knight < GamePiece
-
+    def to_s
+        if @color == "black"
+            return "\u265E"
+        else
+            return "\u2658"
+        end
+    end
 end
 
 class Bishop < GamePiece
-
+    def to_s
+        if @color == "black"
+            return "\u265D"
+        else
+            return "\u2657"
+        end
+    end
 end
 
 class Queen < GamePiece
-
+    def to_s
+        if @color == "black"
+            return "\u265B"
+        else
+            return "\u2655"
+        end
+    end
 end
 
 class King < GamePiece
-
+    def to_s
+        if @color == "black"
+            return "\u265A"
+        else
+            return "\u2654"
+        end
+    end
 end
 
 class Board
