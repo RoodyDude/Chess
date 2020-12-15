@@ -9,7 +9,7 @@ class GamePiece
 end
 
 class Pawn < GamePiece
-    attr_accessor: :color, :moved
+    attr_accessor :color, :moved
     def initialize(color)
         @color = color
         @moved = false
@@ -150,6 +150,11 @@ class Game
     #    grid_item[2].move(@game_board, selection)
     #end
 
+    def move_piece(start, finish)
+        @game_board.grid[finish][2] = @game_board.grid[start].delete_at(2)
+        @game_board.grid[start].push(" ")
+    end
+
     def populate_board
         self.place_white_pieces()
         self.place_black_pieces()
@@ -211,3 +216,5 @@ end
 game = Game.new
 game.display_board
 game.find_unit(game.get_input)
+game.move_piece(8,16)
+game.display_board
