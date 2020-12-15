@@ -2,13 +2,19 @@
 #use nested array for chess board
 #Class Gamepiece, sub classes for pieces that can only move in definite ways vs picking a spot in a line
 class GamePiece
-    attr_accessor :type, :color
+    attr_accessor :color
     def initialize(color)
         @color = color
     end
 end
 
 class Pawn < GamePiece
+    attr_accessor: :color, :moved
+    def initialize(color)
+        @color = color
+        @moved = false
+    end
+
     def to_s
         if @color == "black"
             return "\u265F"
@@ -94,24 +100,55 @@ end
 class Game
     def initialize
         @game_board = Board.new
+        @turn = 1
         self.populate_board
+    end
+
+    def make_move
+        display_eligible_moves(find_unit(get_input()))
     end
 
     def get_input
         puts "Choose a unit. Hit enter when done."
         choice = gets.chomp.split('').map(&:to_i).map { |x| x - 1 }
-        puts "choice: #{choice}"
         choice
     end
 
     def find_unit(input)
-        @game_board.grid.each do |x|
+        @game_board.grid.each_with_index do |x, index|
             if x[0] == input[0] && x[1] == input[1]
-                puts "grid box: #{x}"
-                return x
+                puts "#{[x,index]}"
+                return [x,index]
             end
         end
     end
+
+    def display_eligible_moves(unit)
+        case unit[1][2]
+        when Pawn
+            self.show_pawn_moves(unit)
+        when Rook
+            self.show_rook_moves(unit)
+        when Knight
+            self.show_knight_moves(unit)
+        when Queen
+            self.show_queen_moves(unit)
+        when King
+            self.show_king_moves(unit)
+        else
+            puts "No piece found. Pick another."
+        end
+    end
+
+    def show_pawn_moves(unit)
+        #moved yet? show two moves + knockouts. Otherwise show one + knockouts
+        move1 = unit[1] + 8
+        move2 = unit[1] + 16
+        @game_board.grid[unit[1]]
+    end
+    #def move_unit(grid_item)
+    #    grid_item[2].move(@game_board, selection)
+    #end
 
     def populate_board
         self.place_white_pieces()
