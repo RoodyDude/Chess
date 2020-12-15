@@ -124,7 +124,7 @@ class Game
     end
 
     def display_eligible_moves(unit)
-        case unit[1][2]
+        case unit[0][2]
         when Pawn
             self.show_pawn_moves(unit)
         when Rook
@@ -141,14 +141,11 @@ class Game
     end
 
     def show_pawn_moves(unit)
-        #moved yet? show two moves + knockouts. Otherwise show one + knockouts
-        move1 = unit[1] + 8
-        move2 = unit[1] + 16
-        @game_board.grid[unit[1]]
+        if unit[0][2].moved == false
+            move1 = unit[1] + 8
+            move2 = unit[1] + 16
+        end
     end
-    #def move_unit(grid_item)
-    #    grid_item[2].move(@game_board, selection)
-    #end
 
     def move_piece(start, finish)
         @game_board.grid[finish][2] = @game_board.grid[start].delete_at(2)
@@ -216,5 +213,5 @@ end
 game = Game.new
 game.display_board
 game.find_unit(game.get_input)
-game.move_piece(8,16)
+game.move_piece(8,48)
 game.display_board
