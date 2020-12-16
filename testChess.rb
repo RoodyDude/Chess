@@ -114,9 +114,9 @@ class Game
         choice
     end
 
-    def find_unit(input)
+    def find_unit(choice)
         @game_board.grid.each_with_index do |x, index|
-            if x[0] == input[0] && x[1] == input[1]
+            if x[0] == choice[0] && x[1] == choice[1]
                 puts "#{[x,index]}"
                 return [x,index]
             end
@@ -141,9 +141,17 @@ class Game
     end
 
     def show_pawn_moves(unit)
+        #update to tell if piece is black/white, and identify possible takeover moves
         if unit[0][2].moved == false
             move1 = unit[1] + 8
             move2 = unit[1] + 16
+            @game_board.grid[move1][2] = "0"
+            @game_board.grid[move2][2] = "0"
+            self.display_board
+        else
+            move1 = unit[1] + 8
+            @game_board.grid[move1][2] = "0"
+            self.display_board
         end
     end
 
@@ -212,6 +220,4 @@ class Game
 end
 game = Game.new
 game.display_board
-game.find_unit(game.get_input)
-game.move_piece(8,48)
-game.display_board
+game.display_eligible_moves(game.find_unit(game.get_input))
