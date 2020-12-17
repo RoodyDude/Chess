@@ -121,44 +121,45 @@ class Game
         @game_board.grid.each_with_index do |x, index|
             if x[0] == choice[0] && x[1] == choice[1]
                 puts "#{[x,index]}"
-                return [x,index]
+                piece = [x[2],index]
+                return piece
             end
         end
     end
 
-    def display_eligible_moves(unit)
-        case unit[0][2]
+    def display_eligible_moves(piece)
+        case piece[0]
         when Pawn
-            self.show_pawn_moves(unit)
+            self.show_pawn_moves(piece)
         when Rook
-            self.show_rook_moves(unit)
+            self.show_rook_moves(piece)
         when Knight
-            self.show_knight_moves(unit)
+            self.show_knight_moves(piece)
         when Queen
-            self.show_queen_moves(unit)
+            self.show_queen_moves(piece)
         when King
-            self.show_king_moves(unit)
+            self.show_king_moves(piece)
         else
             puts "No piece found. Pick another."
         end
     end
 
-    def show_pawn_moves(unit)
+    def show_pawn_moves(piece)
         #identify possible takeover moves
-        self.find_pawn_movement(unit)
-        self.find_pawn_takeovers(unit)
+        self.find_pawn_movement(piece)
+        self.find_pawn_takeovers(piece)
     end
 
-    def find_pawn_movement(unit)
-        if unit[0][2].color == "white"
-            move1 = unit[1] + 8
-            move2 = unit[1] + 16
+    def find_pawn_movement(piece)
+        if piece[0].color == "white"
+            move1 = piece[1] + 8
+            move2 = piece[1] + 16
         else
-            move1 = unit[1] - 8
-            move2 = unit[1] - 16
+            move1 = piece[1] - 8
+            move2 = piece[1] - 16
         end
 
-        if unit[0][2].moved == false
+        if piece[0].moved == false
             if is_spot_empty?(move1) && is_spot_empty?(move2)
                 @game_board.grid[move1][2] = "0"
                 @game_board.grid[move2][2] = "0"
@@ -179,22 +180,37 @@ class Game
         end
     end
 
-    def find_pawn_takeovers(unit)
-        if LEFT_EDGES.include?(unit[1])
-            if @game_board.grid[unit[1] + 9][2] != " "
-                puts "Pawn: Possible takeovers: 1"
+    def find_pawn_takeovers(piece)
+        #update to read piece color
+        if piece[0].color == "white"
+            begin
+                right_target = @game_board.grid[piece[1] + 9]
+            rescue
+                right_target = [0,0," "]
             end
-        elsif RIGHT_EDGES.include?(unit[1])
-            if @game_board.grid[unit[1] + 7][2] != " "
-                puts "Pawn: Possible takeovers: 1"
+    
+            begin
+                left_target = @game_board.grid[piece[1] + 7]
+            rescue
+                left_target = [0,0," "]
             end
-        else
-            if @game_board.grid[unit[1] + 7][2] != " " && @game_board.grid[unit[1] + 9][2] != " "
-                puts "Pawn: Possible takeovers: 2"
-            elsif @game_board.grid[unit[1] + 7][2] != " " || @game_board.grid[unit[1] + 9][2] != " "
-                puts "Pawn: Possible takeovers: 1"
+
+            if LEFT_EDGES.include?(piece[1])
+                if right_target[2] != " "
+                    puts "Pawn: Possible takeovers: 1"
+                end
+            elsif RIGHT_EDGES.include?(piece[1])
+                if left_target[2] != " "
+                    puts "Pawn: Possible takeovers: 1"
+                end
             else
-                puts "Pawn: Possible takeovers: 0"
+                if left_target[2] != " " && right_target[2] != " "
+                    puts "Pawn: Possible takeovers: 2"
+                elsif left_target[2] != " " || right_target[2] != " "
+                    puts "Pawn: Possible takeovers: 1"
+                else
+                    puts "Pawn: Possible takeovers: 0"
+                end
             end
         end
     end
