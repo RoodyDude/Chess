@@ -141,10 +141,16 @@ class Game
     end
 
     def show_pawn_moves(unit)
-        #update to tell if piece is black/white, and identify possible takeover moves
-        if unit[0][2].moved == false
+        #update to know when possible moves are out-of-bounds, and identify possible takeover moves
+        if unit[0][2].color == "white"
             move1 = unit[1] + 8
             move2 = unit[1] + 16
+        else
+            move1 = unit[1] - 8
+            move2 = unit[1] - 16
+        end
+
+        if unit[0][2].moved == false
             if is_spot_empty?(move1) && is_spot_empty?(move2)
                 @game_board.grid[move1][2] = "0"
                 @game_board.grid[move2][2] = "0"
@@ -152,16 +158,16 @@ class Game
             elsif is_spot_empty?(move1) && !is_spot_empty?(move2)
                 @game_board.grid[move1][2] = "0"
                 self.display_board
-            elsif !is_spot_empty?(move1) && is_spot_empty?(move2)
-                @game_board.grid[move2][2] = "0"
-                self.display_board
             else 
                 self.display_board
             end
         else
-            move1 = unit[1] + 8
-            @game_board.grid[move1][2] = "0"
-            self.display_board
+            if is_spot_empty(move1)
+                @game_board.grid[move1][2] = "0"
+                self.display_board
+            else
+                self.display_board
+            end
         end
     end
 
@@ -238,7 +244,7 @@ class Game
 end
 game = Game.new
 game.display_board
-game.move_piece(0,24)
+game.move_piece(0,32)
 game.move_piece(1,16)
 game.display_board
 game.display_eligible_moves(game.find_unit(game.get_input))
