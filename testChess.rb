@@ -145,13 +145,31 @@ class Game
         if unit[0][2].moved == false
             move1 = unit[1] + 8
             move2 = unit[1] + 16
-            @game_board.grid[move1][2] = "0"
-            @game_board.grid[move2][2] = "0"
-            self.display_board
+            if is_spot_empty?(move1) && is_spot_empty?(move2)
+                @game_board.grid[move1][2] = "0"
+                @game_board.grid[move2][2] = "0"
+                self.display_board
+            elsif is_spot_empty?(move1) && !is_spot_empty?(move2)
+                @game_board.grid[move1][2] = "0"
+                self.display_board
+            elsif !is_spot_empty?(move1) && is_spot_empty?(move2)
+                @game_board.grid[move2][2] = "0"
+                self.display_board
+            else 
+                self.display_board
+            end
         else
             move1 = unit[1] + 8
             @game_board.grid[move1][2] = "0"
             self.display_board
+        end
+    end
+
+    def is_spot_empty?(grid_number)
+        if @game_board.grid[grid_number][2] == " "
+            return true
+        else
+            return false
         end
     end
 
@@ -219,5 +237,8 @@ class Game
     end
 end
 game = Game.new
+game.display_board
+game.move_piece(0,24)
+game.move_piece(1,16)
 game.display_board
 game.display_eligible_moves(game.find_unit(game.get_input))
