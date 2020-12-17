@@ -141,7 +141,12 @@ class Game
     end
 
     def show_pawn_moves(unit)
-        #update to know when possible moves are out-of-bounds, and identify possible takeover moves
+        #identify possible takeover moves
+        self.find_pawn_movement(unit)
+        self.find_pawn_takeovers(unit)
+    end
+
+    def find_pawn_movement(unit)
         if unit[0][2].color == "white"
             move1 = unit[1] + 8
             move2 = unit[1] + 16
@@ -171,8 +176,17 @@ class Game
         end
     end
 
+    def find_pawn_takeovers(unit)
+
+    end
+
     def is_spot_empty?(grid_number)
-        if @game_board.grid[grid_number][2] == " "
+        begin
+            spot = @game_board.grid[grid_number][2]
+        rescue
+            return false
+        end
+        if spot == " "
             return true
         else
             return false
@@ -244,7 +258,6 @@ class Game
 end
 game = Game.new
 game.display_board
-game.move_piece(0,32)
-game.move_piece(1,16)
+game.move_piece(8,56)
 game.display_board
 game.display_eligible_moves(game.find_unit(game.get_input))
