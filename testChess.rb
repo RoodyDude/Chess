@@ -1,6 +1,9 @@
 #command-line chess 
 #use nested array for chess board
 #Class Gamepiece, sub classes for pieces that can only move in definite ways vs picking a spot in a line
+LEFT_EDGES = [0,8,16,24,32,40,48,56]
+RIGHT_EDGES = [7,15,23,31,39,47,55,63]
+
 class GamePiece
     attr_accessor :color
     def initialize(color)
@@ -177,7 +180,23 @@ class Game
     end
 
     def find_pawn_takeovers(unit)
-
+        if LEFT_EDGES.include?(unit[1])
+            if @game_board.grid[unit[1] + 9][2] != " "
+                puts "Pawn: Possible takeovers: 1"
+            end
+        elsif RIGHT_EDGES.include?(unit[1])
+            if @game_board.grid[unit[1] + 7][2] != " "
+                puts "Pawn: Possible takeovers: 1"
+            end
+        else
+            if @game_board.grid[unit[1] + 7][2] != " " && @game_board.grid[unit[1] + 9][2] != " "
+                puts "Pawn: Possible takeovers: 2"
+            elsif @game_board.grid[unit[1] + 7][2] != " " || @game_board.grid[unit[1] + 9][2] != " "
+                puts "Pawn: Possible takeovers: 1"
+            else
+                puts "Pawn: Possible takeovers: 0"
+            end
+        end
     end
 
     def is_spot_empty?(grid_number)
@@ -258,6 +277,6 @@ class Game
 end
 game = Game.new
 game.display_board
-game.move_piece(8,56)
+game.move_piece(49,17)
 game.display_board
 game.display_eligible_moves(game.find_unit(game.get_input))
