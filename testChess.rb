@@ -181,37 +181,44 @@ class Game
     end
 
     def find_pawn_takeovers(piece)
-        #update to read piece color
+        if piece[1] < 8 || piece[1] > 55
+            puts "No possible takeovers"
+            return
+        end
         if piece[0].color == "white"
-            begin
-                right_target = @game_board.grid[piece[1] + 9]
-            rescue
-                right_target = [0,0," "]
-            end
-    
-            begin
-                left_target = @game_board.grid[piece[1] + 7]
-            rescue
-                left_target = [0,0," "]
-            end
+            right_target = @game_board.grid[piece[1] + 9]
+            left_target = @game_board.grid[piece[1] + 7]
+            self.show_pawn_takeover_hint(left_target, right_target, piece)
+        else
+            right_target = @game_board.grid[piece[1] - 7]
+            left_target = @game_board.grid[piece[1] - 9]
+            self.show_pawn_takeover_hint(left_target, right_target, piece)
+        end
+    end
 
-            if LEFT_EDGES.include?(piece[1])
-                if right_target[2] != " "
-                    puts "Pawn: Possible takeovers: 1"
-                end
-            elsif RIGHT_EDGES.include?(piece[1])
-                if left_target[2] != " "
-                    puts "Pawn: Possible takeovers: 1"
-                end
-            else
-                if left_target[2] != " " && right_target[2] != " "
-                    puts "Pawn: Possible takeovers: 2"
-                elsif left_target[2] != " " || right_target[2] != " "
-                    puts "Pawn: Possible takeovers: 1"
-                else
-                    puts "Pawn: Possible takeovers: 0"
-                end
-            end
+    def show_pawn_takeover_hint(left_target, right_target, piece)
+        begin
+            color1 = right_target[2].color
+        rescue
+            color1 = piece[0].color
+        end
+
+        begin
+            color2 = left_target[2].color
+        rescue
+            color2 = piece[0].color
+        end
+
+        if LEFT_EDGES.include?(piece[1]) && color1 != piece[0].color
+            puts "Pawn: Possible takeovers: 1"
+        elsif RIGHT_EDGES.include?(piece[1]) && color2 != piece[0].color
+            puts "Pawn: Possible takeovers: 1"
+        elsif color1 != piece[0].color && color2 != piece[0].color
+            puts "Pawn: Possible takeovers: 2"
+        elsif color1!= piece[0].color || color2 != piece[0].color
+            puts "Pawn: Possible takeovers: 1"
+        else
+            puts "No possible takeovers."
         end
     end
 
@@ -293,6 +300,7 @@ class Game
 end
 game = Game.new
 game.display_board
-game.move_piece(49,17)
+game.move_piece(8,41)
+game.move_piece(9,39)
 game.display_board
 game.display_eligible_moves(game.find_unit(game.get_input))
