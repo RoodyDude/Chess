@@ -135,6 +135,8 @@ class Game
             self.show_rook_moves(piece)
         when Knight
             self.show_knight_moves(piece)
+        when Bishop
+            self.show_bishop_moves(piece)
         when Queen
             self.show_queen_moves(piece)
         when King
@@ -145,9 +147,77 @@ class Game
     end
 
     def show_pawn_moves(piece)
-        #identify possible takeover moves
         self.find_pawn_movement(piece)
         self.find_pawn_takeovers(piece)
+    end
+
+    def show_rook_moves(piece)
+        self.find_rook_movement(piece)
+        self.find_rook_takeovers(piece)
+    end
+
+    def show_knight_moves(piece)
+        self.find_knight_movement(piece)
+        self.find_knight_takeovers(piece)
+    end
+
+    def show_bishop_moves(piece)
+        self.find_bishop_movement(piece)
+        self.find_bishop_takeovers(piece)
+    end
+
+    def show_queen_moves(piece)
+        self.find_queen_movement(piece)
+        self.find_queen_takeovers(piece)
+    end
+
+    def show_king_moves(piece)
+        self.find_king_movement(piece)
+        self.find_king_takeovers(piece)
+    end
+
+    def find_rook_movement(piece)
+        up_marker = piece[1] + 8
+        down_marker = piece[1] - 8
+        self.find_vertical_options(up_marker, down_marker)
+        self.find_horizontal_options(piece[1])
+        self.display_board
+    end
+
+    def find_rook_takeovers(piece)
+
+    end
+
+    def find_knight_movement(piece)
+
+    end
+
+    def find_knight_takeovers(piece)
+
+    end
+
+    def find_bishop_movement(piece)
+
+    end
+
+    def find_bishop_takeovers(piece)
+
+    end
+
+    def find_queen_movement(piece)
+
+    end
+    
+    def find_queen_takeovers(piece)
+
+    end
+
+    def find_king_movement(piece)
+
+    end
+
+    def find_king_takeovers(piece)
+
     end
 
     def find_pawn_movement(piece)
@@ -219,6 +289,67 @@ class Game
             puts "Pawn: Possible takeovers: 1"
         else
             puts "No possible takeovers."
+        end
+    end
+
+    def find_vertical_options(up_marker, down_marker)
+        while up_marker <= 63
+            if @game_board.grid[up_marker][2] == " "
+                @game_board.grid[up_marker][2] = "0"
+                up_marker += 8
+            else
+                break
+            end
+        end
+
+        while down_marker >= 0
+            if @game_board.grid[down_marker][2] == " "
+                @game_board.grid[down_marker][2] = "0"
+                down_marker -= 8
+            else
+                break
+            end
+        end
+    end
+
+    def find_horizontal_options(index)
+        if LEFT_EDGES.include?(index)
+            self.show_right_options(index+1)
+        elsif RIGHT_EDGES.include?(index)
+            self.show_left_options(index-1)
+        else
+            self.show_right_options(index+1)
+            self.show_left_options(index-1)
+        end        
+    end
+
+    def show_right_options(right_marker)
+        end_of_line = false
+        until end_of_line == true do
+            if LEFT_EDGES.include?(right_marker)
+                end_of_line = true
+            elsif is_spot_empty?(right_marker)
+                @game_board.grid[right_marker][2] = "0"
+                right_marker += 1
+                next
+            else
+                break
+            end
+        end
+    end
+
+    def show_left_options(left_marker)
+        end_of_line = false
+        until end_of_line == true do
+            if RIGHT_EDGES.include?(left_marker)
+                end_of_line = true
+            elsif is_spot_empty?(left_marker)
+                @game_board.grid[left_marker][2] = "0"
+                left_marker -= 1
+                next
+            else
+                break
+            end
         end
     end
 
@@ -300,7 +431,9 @@ class Game
 end
 game = Game.new
 game.display_board
-game.move_piece(8,41)
+game.move_piece(8,24)
 game.move_piece(9,39)
+game.move_piece(0,30)
 game.display_board
 game.display_eligible_moves(game.find_unit(game.get_input))
+game.display_board
