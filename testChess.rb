@@ -233,26 +233,18 @@ class Game
             if is_spot_empty?(move1) && is_spot_empty?(move2)
                 @game_board.grid[move1][2] = "0"
                 @game_board.grid[move2][2] = "0"
-                self.display_board
             elsif is_spot_empty?(move1) && !is_spot_empty?(move2)
                 @game_board.grid[move1][2] = "0"
-                self.display_board
-            else 
-                self.display_board
             end
         else
             if is_spot_empty(move1)
                 @game_board.grid[move1][2] = "0"
-                self.display_board
-            else
-                self.display_board
             end
         end
     end
 
     def find_pawn_takeovers(piece)
         if piece[1] < 8 || piece[1] > 55
-            puts "No possible takeovers"
             return
         end
         if piece[0].color == "white"
@@ -288,13 +280,13 @@ class Game
         elsif color1!= piece[0].color || color2 != piece[0].color
             puts "Pawn: Possible takeovers: 1"
         else
-            puts "No possible takeovers."
+            puts "Pawn: No possible takeovers."
         end
     end
 
     def find_vertical_options(up_marker, down_marker)
         while up_marker <= 63
-            if @game_board.grid[up_marker][2] == " "
+            if is_spot_empty?(up_marker)
                 @game_board.grid[up_marker][2] = "0"
                 up_marker += 8
             else
@@ -303,7 +295,7 @@ class Game
         end
 
         while down_marker >= 0
-            if @game_board.grid[down_marker][2] == " "
+            if is_spot_empty?(down_marker)
                 @game_board.grid[down_marker][2] = "0"
                 down_marker -= 8
             else
@@ -313,17 +305,11 @@ class Game
     end
 
     def find_horizontal_options(index)
-        if LEFT_EDGES.include?(index)
-            self.show_right_options(index+1)
-        elsif RIGHT_EDGES.include?(index)
-            self.show_left_options(index-1)
-        else
-            self.show_right_options(index+1)
-            self.show_left_options(index-1)
-        end        
+        self.find_right_options(index+1)
+        self.find_left_options(index-1)     
     end
 
-    def show_right_options(right_marker)
+    def find_right_options(right_marker)
         end_of_line = false
         until end_of_line == true do
             if LEFT_EDGES.include?(right_marker)
@@ -338,7 +324,7 @@ class Game
         end
     end
 
-    def show_left_options(left_marker)
+    def find_left_options(left_marker)
         end_of_line = false
         until end_of_line == true do
             if RIGHT_EDGES.include?(left_marker)
@@ -433,7 +419,7 @@ game = Game.new
 game.display_board
 game.move_piece(8,24)
 game.move_piece(9,39)
-game.move_piece(0,30)
+game.move_piece(0,32)
 game.display_board
 game.display_eligible_moves(game.find_unit(game.get_input))
 game.display_board
