@@ -144,22 +144,18 @@ class Game
     def show_pawn_moves(piece)
         self.find_pawn_movement(piece)
         self.find_pawn_takeovers(piece)
-        self.display_board
     end
 
     def show_rook_moves(piece)
         self.find_rook_movement_and_takeovers(piece)
-        self.display_board
     end
 
     def show_knight_moves(piece)
         self.find_knight_movement_and_takeovers(piece)
-        self.display_board
     end
 
     def show_bishop_moves(piece)
         self.find_bishop_movement_and_takeovers(piece)
-        self.display_board
     end
 
     def show_queen_moves(piece)
@@ -167,8 +163,7 @@ class Game
     end
 
     def show_king_moves(piece)
-        self.find_king_movement(piece)
-        self.find_king_takeovers(piece)
+        self.find_king_movement_and_takeovers(piece)
     end
 
     def find_rook_movement_and_takeovers(piece)
@@ -422,17 +417,165 @@ class Game
         move2 = find_horizontal_options(piece[0],index)
         move3 = find_diagonal_options(piece[0], index)
         sum = move1 + move2 + move3
-        self.display_board
         puts "Queen: possible takeovers: #{sum}"
     end
     
-
-    def find_king_movement(piece)
-
+    def find_king_movement_and_takeovers(piece)
+        index = piece[1]
+        move1 = find_king_move_1(piece[0], index)
+        move2 = find_king_move_2(piece[0], index)
+        move3 = find_king_move_3(piece[0], index)
+        move4 = find_king_move_4(piece[0], index)
+        move5 = find_king_move_5(piece[0], index)
+        move6 = find_king_move_6(piece[0], index)
+        move7 = find_king_move_7(piece[0], index)
+        move8 = find_king_move_8(piece[0], index)
+        sum = move1 + move2 + move3 + move4 + move5 + move6 + move7 + move8
+        puts "King: possible takeovers: #{sum}"
     end
 
-    def find_king_takeovers(piece)
+    def find_king_move_1(piece, index)
+        marker = index + 8
+        if index > 55
+            return 0
+        else
+            if is_spot_empty?(marker)
+                @game_board.grid[marker][2] = "0"
+                return 0
+            else
+                if @game_board.grid[marker][2].color != piece.color
+                    return 1
+                else
+                    return 0
+                end
+            end
+        end
+    end
 
+    def find_king_move_2(piece, index)
+        marker = index + 9
+        if index > 55 || RIGHT_EDGES.include?(index)
+            return 0
+        else
+            if is_spot_empty?(marker)
+                @game_board.grid[marker][2] = "0"
+                return 0
+            else
+                if @game_board.grid[marker][2].color != piece.color
+                    return 1
+                else
+                    return 0
+                end
+            end
+        end
+    end
+    def find_king_move_3(piece, index)
+        marker = index + 1
+        if RIGHT_EDGES.include?(index)
+            return 0
+        else
+            if is_spot_empty?(marker)
+                @game_board.grid[marker][2] = "0"
+                return 0
+            else
+                if @game_board.grid[marker][2].color != piece.color
+                    return 1
+                else
+                    return 0
+                end
+            end
+        end
+    end
+
+    def find_king_move_4(piece, index)
+        marker = index - 7
+        if index < 8 || RIGHT_EDGES.include?(index)
+            return 0
+        else
+            if is_spot_empty?(marker)
+                @game_board.grid[marker][2] = "0"
+                return 0
+            else
+                if @game_board.grid[marker][2].color != piece.color
+                    return 1
+                else
+                    return 0
+                end
+            end
+        end
+    end
+
+    def find_king_move_5(piece, index)
+        marker = index - 8
+        if index < 8
+            return 0
+        else
+            if is_spot_empty?(marker)
+                @game_board.grid[marker][2] = "0"
+                return 0
+            else
+                if @game_board.grid[marker][2].color != piece.color
+                    return 1
+                else
+                    return 0
+                end
+            end
+        end
+    end
+
+    def find_king_move_6(piece, index)
+        marker = index - 9
+        if index < 8 || LEFT_EDGES.include?(index)
+            return 0
+        else
+            if is_spot_empty?(marker)
+                @game_board.grid[marker][2] = "0"
+                return 0
+            else
+                if @game_board.grid[marker][2].color != piece.color
+                    return 1
+                else
+                    return 0
+                end
+            end
+        end
+    end
+
+    def find_king_move_7(piece, index)
+        marker = index - 1
+        if LEFT_EDGES.include?(index)
+            return 0
+        else
+            if is_spot_empty?(marker)
+                @game_board.grid[marker][2] = "0"
+                return 0
+            else
+                if @game_board.grid[marker][2].color != piece.color
+                    return 1
+                else
+                    return 0
+                end
+            end
+        end
+    end
+
+    def find_king_move_8(piece, index)
+        marker = index + 7
+        if index > 55 || LEFT_EDGES.include?(index)
+            return 0
+        else
+            if is_spot_empty?(marker)
+                @game_board.grid[marker][2] = "0"
+                return 0
+            else
+                puts "#{piece}"
+                if @game_board.grid[marker][2].color != piece.color
+                    return 1
+                else
+                    return 0
+                end
+            end
+        end
     end
 
     def find_pawn_movement(piece)
@@ -535,7 +678,6 @@ class Game
 
     def find_horizontal_options(piece, index)
         sum = 0
-        puts "index: #{index}"
         sum += self.find_right_options(index+1, piece)
         sum += self.find_left_options(index-1, piece)
         return sum
@@ -552,7 +694,6 @@ class Game
                 next
             else
                 if @game_board.grid[right_marker][2].color != piece.color
-                    puts "here?"
                     return 1
                 else
                     return 0
@@ -572,7 +713,6 @@ class Game
                 next
             else
                 if @game_board.grid[left_marker][2].color != piece.color
-                    puts piece.color
                     return 1
                 else
                     return 0
@@ -660,7 +800,7 @@ end
 game = Game.new
 game.display_board
 
-game.move_piece(3,23)
+game.move_piece(4,40)
 game.move_piece(8,19)
 game.display_board
 game.display_eligible_moves(game.find_unit(game.get_input))
