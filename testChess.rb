@@ -406,7 +406,6 @@ class Game
         response = find_diagonal_options(piece[0], piece[1])
         puts "Bishop: possible takeovers: #{response[0]}"
         targets += response[1]
-        puts "#{targets}"
         return targets
     end
 
@@ -503,12 +502,19 @@ class Game
     end
 
     def find_queen_movement_and_takeovers(piece)
+        targets = []
+        new_targets = []
         index = piece[1]
         move1 = find_vertical_options(piece[0], index)
         move2 = find_horizontal_options(piece[0],index)
         move3 = find_diagonal_options(piece[0], index)
-        sum = move1 + move2 + move3
+        sum = move1[0] + move2[0] + move3[0]
+        target1 = move1[1].flatten
+        target2 = move2[1].flatten
+        target3 = move3[1].flatten
+        new_targets = target1 + target2 + target3
         puts "Queen: possible takeovers: #{sum}"
+        return new_targets
     end
     
     def find_king_movement_and_takeovers(piece)
