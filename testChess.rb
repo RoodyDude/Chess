@@ -107,10 +107,6 @@ class Game
         self.populate_board
     end
 
-    def make_move
-        display_eligible_moves(find_unit(get_input()))
-    end
-
     def get_input
         puts "Choose a unit. Hit enter when done."
         choice = gets.chomp.split('').map(&:to_i).map { |x| x - 1 }
@@ -153,21 +149,21 @@ class Game
 
     def show_rook_moves(piece)
         self.find_rook_movement_and_takeovers(piece)
+        self.display_board
     end
 
     def show_knight_moves(piece)
-        self.find_knight_movement(piece)
-        self.find_knight_takeovers(piece)
+        self.find_knight_movement_and_takeovers(piece)
+        self.display_board
     end
 
     def show_bishop_moves(piece)
-        self.find_bishop_movement(piece)
-        self.find_bishop_takeovers(piece)
+        self.find_bishop_movement_and_takeovers(piece)
+        self.display_board
     end
 
     def show_queen_moves(piece)
-        self.find_queen_movement(piece)
-        self.find_queen_takeovers(piece)
+        self.find_queen_movement_and_takeovers(piece)
     end
 
     def show_king_moves(piece)
@@ -175,17 +171,17 @@ class Game
         self.find_king_takeovers(piece)
     end
 
-    def find_rook_movement_takeovers(piece)
+    def find_rook_movement_and_takeovers(piece)
         up_marker = piece[1] + 8
         down_marker = piece[1] - 8
         sum = 0
-        sum += self.find_vertical_options(up_marker, down_marker, piece[0])
-        sum += self.find_horizontal_options(piece[1], piece[0])
+        sum += self.find_vertical_options(piece[0], piece[1])
+        sum += self.find_horizontal_options(piece[0], piece[1])
         self.display_board
         puts "Rook: possible takeovers: #{sum}"
     end
 
-    def find_knight_movement(piece)
+    def find_knight_movement_and_takeovers(piece)
         index = piece[1]
         move1 = find_move1(index, piece[0])
         move2 = find_move2(index, piece[0])
@@ -196,7 +192,7 @@ class Game
         move7 = find_move7(index, piece[0])
         move8 = find_move8(index, piece[0])
         sum = move1 + move2 + move3 + move4 + move5 + move6 + move7 + move8
-        puts "Knight: Possible takeovers: #{sum}"
+        puts "Knight: possible takeovers: #{sum}"
     end
 
     def find_move1(index, piece)
@@ -326,21 +322,110 @@ class Game
         return 0
     end
 
-    def find_bishop_movement(piece)
-
+    def find_bishop_movement_and_takeovers(piece)
+        sum = find_diagonal_options(piece[0], piece[1])
+        puts "Bishop: possible takeovers: #{sum}"
     end
 
-    def find_bishop_takeovers(piece)
-
+    def find_diagonal_options(piece, index)
+        up_right_diag = find_first_diag(piece, index)
+        down_right_diag = find_second_diag(piece, index)
+        up_left_diag = find_third_diag(piece, index)
+        down_left_diag = find_fourth_diag(piece, index)
+        sum = up_right_diag + down_right_diag + up_left_diag + down_left_diag
+        return sum
     end
 
-    def find_queen_movement(piece)
+    def find_first_diag(piece, index)
+        diag_marker = index += 9
+        end_of_line = false
+        until end_of_line == true do
+            if LEFT_EDGES.include?(diag_marker)
+                return 0
+            elsif is_spot_empty?(diag_marker)
+                @game_board.grid[diag_marker][2] = "0"
+                diag_marker += 9
+                next
+            else
+                if @game_board.grid[diag_marker][2].color != piece.color
+                    return 1
+                else
+                    return 0
+                end
+            end
+        end
+    end
 
+    def find_second_diag(piece, index)
+        diag_marker = index -= 7
+        end_of_line = false
+        until end_of_line == true do
+            if LEFT_EDGES.include?(diag_marker)
+                return 0
+            elsif is_spot_empty?(diag_marker)
+                @game_board.grid[diag_marker][2] = "0"
+                diag_marker -= 7
+                next
+            else
+                if @game_board.grid[diag_marker][2].color != piece.color
+                    return 1
+                else
+                    return 0
+                end
+            end
+        end
+    end
+
+    def find_third_diag(piece, index)
+        diag_marker = index -= 9
+        end_of_line = false
+        until end_of_line == true do
+            if RIGHT_EDGES.include?(diag_marker)
+                return 0
+            elsif is_spot_empty?(diag_marker)
+                @game_board.grid[diag_marker][2] = "0"
+                diag_marker -= 9
+                next
+            else
+                if @game_board.grid[diag_marker][2].color != piece.color
+                    return 1
+                else
+                    return 0
+                end
+            end
+        end
+    end
+
+    def find_fourth_diag(piece, index)
+        diag_marker = index += 7
+        end_of_line = false
+        until end_of_line == true do
+            if RIGHT_EDGES.include?(diag_marker)
+                return 0
+            elsif is_spot_empty?(diag_marker)
+                @game_board.grid[diag_marker][2] = "0"
+                diag_marker += 7
+                next
+            else
+                if @game_board.grid[diag_marker][2].color != piece.color
+                    return 1
+                else
+                    return 0
+                end
+            end
+        end
+    end
+
+    def find_queen_movement_and_takeovers(piece)
+        index = piece[1]
+        move1 = find_vertical_options(piece[0], index)
+        move2 = find_horizontal_options(piece[0],index)
+        move3 = find_diagonal_options(piece[0], index)
+        sum = move1 + move2 + move3
+        self.display_board
+        puts "Queen: possible takeovers: #{sum}"
     end
     
-    def find_queen_takeovers(piece)
-
-    end
 
     def find_king_movement(piece)
 
@@ -367,7 +452,7 @@ class Game
                 @game_board.grid[move1][2] = "0"
             end
         else
-            if is_spot_empty(move1)
+            if is_spot_empty?(move1)
                 @game_board.grid[move1][2] = "0"
             end
         end
@@ -414,8 +499,10 @@ class Game
         end
     end
 
-    def find_vertical_options(up_marker, down_marker, piece)
+    def find_vertical_options(piece, index)
         sum = 0
+        up_marker = index + 8
+        down_marker = index - 8
         while up_marker <= 63
             if is_spot_empty?(up_marker)
                 @game_board.grid[up_marker][2] = "0"
@@ -446,18 +533,18 @@ class Game
         return sum
     end
 
-    def find_horizontal_options(index, piece)
-        hits = 0
-        hits += self.find_right_options(index+1, piece)
-        puts hits
-        hits += self.find_left_options(index-1, piece)
-        return hits
+    def find_horizontal_options(piece, index)
+        sum = 0
+        puts "index: #{index}"
+        sum += self.find_right_options(index+1, piece)
+        sum += self.find_left_options(index-1, piece)
+        return sum
     end
 
     def find_right_options(right_marker, piece)
         end_of_line = false
         until end_of_line == true do
-            if LEFT_EDGES.include?(right_marker)
+            if LEFT_EDGES.include?(right_marker) || right_marker > 63
                 return 0
             elsif is_spot_empty?(right_marker)
                 @game_board.grid[right_marker][2] = "0"
@@ -465,6 +552,7 @@ class Game
                 next
             else
                 if @game_board.grid[right_marker][2].color != piece.color
+                    puts "here?"
                     return 1
                 else
                     return 0
@@ -476,7 +564,7 @@ class Game
     def find_left_options(left_marker, piece)
         end_of_line = false
         until end_of_line == true do
-            if RIGHT_EDGES.include?(left_marker)
+            if RIGHT_EDGES.include?(left_marker) || left_marker < 0
                 return 0
             elsif is_spot_empty?(left_marker)
                 @game_board.grid[left_marker][2] = "0"
@@ -484,6 +572,7 @@ class Game
                 next
             else
                 if @game_board.grid[left_marker][2].color != piece.color
+                    puts piece.color
                     return 1
                 else
                     return 0
@@ -571,15 +660,7 @@ end
 game = Game.new
 game.display_board
 
-game.move_piece(1,25)
-game.move_piece(48,42)
-game.move_piece(49,35)
-game.move_piece(50,10)
-game.move_piece(51,8)
-game.move_piece(52,12)
-game.move_piece(53,10)
-game.move_piece(54,17)
-game.move_piece(55,33)
+game.move_piece(3,23)
+game.move_piece(8,19)
 game.display_board
 game.display_eligible_moves(game.find_unit(game.get_input))
-game.display_board
