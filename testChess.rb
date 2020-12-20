@@ -149,11 +149,11 @@ class Game
     def show_pawn_moves(piece)
         self.find_pawn_movement(piece)
         self.find_pawn_takeovers(piece)
+        self.display_board
     end
 
     def show_rook_moves(piece)
-        self.find_rook_movement(piece)
-        self.find_rook_takeovers(piece)
+        self.find_rook_movement_and_takeovers(piece)
     end
 
     def show_knight_moves(piece)
@@ -176,16 +176,14 @@ class Game
         self.find_king_takeovers(piece)
     end
 
-    def find_rook_movement(piece)
+    def find_rook_movement_takeovers(piece)
         up_marker = piece[1] + 8
         down_marker = piece[1] - 8
-        self.find_vertical_options(up_marker, down_marker)
-        self.find_horizontal_options(piece[1])
+        sum = 0
+        sum += self.find_vertical_options(up_marker, down_marker, piece[0])
+        sum += self.find_horizontal_options(piece[1], piece[0])
         self.display_board
-    end
-
-    def find_rook_takeovers(piece)
-
+        puts "Rook: possible takeovers: #{sum}"
     end
 
     def find_knight_movement(piece)
@@ -284,13 +282,19 @@ class Game
         end
     end
 
-    def find_vertical_options(up_marker, down_marker)
+    def find_vertical_options(up_marker, down_marker, piece)
+        sum = 0
         while up_marker <= 63
             if is_spot_empty?(up_marker)
                 @game_board.grid[up_marker][2] = "0"
                 up_marker += 8
             else
-                break
+                if @game_board.grid[up_marker][2].color != piece.color
+                    sum += 1
+                    break
+                else
+                    break
+                end
             end
         end
 
@@ -299,42 +303,59 @@ class Game
                 @game_board.grid[down_marker][2] = "0"
                 down_marker -= 8
             else
-                break
+                if @game_board.grid[down_marker][2].color != piece.color
+                    sum += 1
+                    break
+                else
+                    break
+                end
             end
         end
+        return sum
     end
 
-    def find_horizontal_options(index)
-        self.find_right_options(index+1)
-        self.find_left_options(index-1)     
+    def find_horizontal_options(index, piece)
+        hits = 0
+        hits += self.find_right_options(index+1, piece)
+        puts hits
+        hits += self.find_left_options(index-1, piece)
+        return hits
     end
 
-    def find_right_options(right_marker)
+    def find_right_options(right_marker, piece)
         end_of_line = false
         until end_of_line == true do
             if LEFT_EDGES.include?(right_marker)
-                end_of_line = true
+                return 0
             elsif is_spot_empty?(right_marker)
                 @game_board.grid[right_marker][2] = "0"
                 right_marker += 1
                 next
             else
-                break
+                if @game_board.grid[right_marker][2].color != piece.color
+                    return 1
+                else
+                    return 0
+                end
             end
         end
     end
 
-    def find_left_options(left_marker)
+    def find_left_options(left_marker, piece)
         end_of_line = false
         until end_of_line == true do
             if RIGHT_EDGES.include?(left_marker)
-                end_of_line = true
+                return 0
             elsif is_spot_empty?(left_marker)
                 @game_board.grid[left_marker][2] = "0"
                 left_marker -= 1
                 next
             else
-                break
+                if @game_board.grid[left_marker][2].color != piece.color
+                    return 1
+                else
+                    return 0
+                end
             end
         end
     end
@@ -417,9 +438,10 @@ class Game
 end
 game = Game.new
 game.display_board
-game.move_piece(8,24)
-game.move_piece(9,39)
-game.move_piece(0,32)
+game.move_piece(49,39)
+game.move_piece(0,33)
+game.move_piece(60,17)
+game.move_piece(5,32)
 game.display_board
 game.display_eligible_moves(game.find_unit(game.get_input))
 game.display_board
