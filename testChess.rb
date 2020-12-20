@@ -120,7 +120,6 @@ class Game
     def find_unit(choice)
         @game_board.grid.each_with_index do |x, index|
             if x[0] == choice[0] && x[1] == choice[1]
-                puts "#{[x,index]}"
                 piece = [x[2],index]
                 return piece
             end
@@ -187,11 +186,144 @@ class Game
     end
 
     def find_knight_movement(piece)
-
+        index = piece[1]
+        move1 = find_move1(index, piece[0])
+        move2 = find_move2(index, piece[0])
+        move3 = find_move3(index, piece[0])
+        move4 = find_move4(index, piece[0])
+        move5 = find_move5(index, piece[0])
+        move6 = find_move6(index, piece[0])
+        move7 = find_move7(index, piece[0])
+        move8 = find_move8(index, piece[0])
+        sum = move1 + move2 + move3 + move4 + move5 + move6 + move7 + move8
+        puts "Knight: Possible takeovers: #{sum}"
     end
 
-    def find_knight_takeovers(piece)
+    def find_move1(index, piece)
+        if index > 47 || RIGHT_EDGES.include?(index)
+            return 0
+        else
+            spot = index + 17
+            if is_spot_empty?(spot)
+                @game_board.grid[spot][2] = "0"
+            else
+                if piece.color != @game_board.grid[spot][2].color
+                    return 1
+                end
+            end
+        end
+        return 0
+    end
 
+    def find_move2(index,piece)
+        if index > 55 || RIGHT_EDGES.include?(index) || RIGHT_EDGES.include?(index + 1)
+            return 0
+        else
+            spot = index + 10
+            if is_spot_empty?(spot)
+                @game_board.grid[spot][2] = "0"
+            else
+                if piece.color != @game_board.grid[spot][2].color
+                    return 1
+                end
+            end
+        end
+        return 0
+    end
+
+    def find_move3(index,piece)
+        if index < 8 || RIGHT_EDGES.include?(index) || RIGHT_EDGES.include?(index + 1)
+            return 0
+        else
+            spot = index - 6
+            if is_spot_empty?(spot)
+                @game_board.grid[spot][2] = "0"
+            else
+                if piece.color != @game_board.grid[spot][2].color
+                    return 1
+                end
+            end
+        end
+        return 0
+    end
+
+    def find_move4(index,piece)
+        if index < 16 || RIGHT_EDGES.include?(index)
+            return 0
+        else
+            spot = index - 15
+            if is_spot_empty?(spot)
+                @game_board.grid[spot][2] = "0"
+            else
+                if piece.color != @game_board.grid[spot][2].color
+                    return 1
+                end
+            end
+        end
+        return 0
+    end
+
+    def find_move5(index,piece)
+        if index < 16 || LEFT_EDGES.include?(index)
+            return 0
+        else
+            spot = index - 17
+            if is_spot_empty?(spot)
+                @game_board.grid[spot][2] = "0"
+            else
+                if piece.color != @game_board.grid[spot][2].color
+                    return 1
+                end
+            end
+        end
+    end
+
+    def find_move6(index,piece)
+        if index < 8 || LEFT_EDGES.include?(index) || LEFT_EDGES.include?(index - 1)
+            return 0
+        else
+            spot = index - 10
+            if is_spot_empty?(spot)
+                @game_board.grid[spot][2] = "0"
+            else
+                if piece.color != @game_board.grid[spot][2].color
+                    return 1
+                end
+            end
+        end
+        return 0
+    end
+
+    def find_move7(index,piece)
+        if index > 55 || LEFT_EDGES.include?(index) || LEFT_EDGES.include?(index - 1)
+            return 0
+        else
+            spot = index + 6
+            if is_spot_empty?(spot)
+                @game_board.grid[spot][2] = "0"
+            else
+                if piece.color != @game_board.grid[spot][2].color
+                    return 1
+                end
+            end
+        end
+        return 0
+    end
+
+    def find_move8(index,piece)
+        if index > 47 || LEFT_EDGES.include?(index)
+            return 0
+        else
+            spot = index + 15
+            if is_spot_empty?(spot)
+                @game_board.grid[spot][2] = "0"
+            else
+                if piece.color != @game_board.grid[spot][2].color
+                    return 1
+                end
+            end
+        end
+        return 0
     end
 
     def find_bishop_movement(piece)
@@ -438,10 +570,16 @@ class Game
 end
 game = Game.new
 game.display_board
-game.move_piece(49,39)
-game.move_piece(0,33)
-game.move_piece(60,17)
-game.move_piece(5,32)
+
+game.move_piece(1,25)
+game.move_piece(48,42)
+game.move_piece(49,35)
+game.move_piece(50,10)
+game.move_piece(51,8)
+game.move_piece(52,12)
+game.move_piece(53,10)
+game.move_piece(54,17)
+game.move_piece(55,33)
 game.display_board
 game.display_eligible_moves(game.find_unit(game.get_input))
 game.display_board
