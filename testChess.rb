@@ -102,6 +102,7 @@ class Game
     def initialize
         @game_board = Board.new
         @turn = 1
+        @check = false
         self.populate_board
     end
 
@@ -116,23 +117,70 @@ class Game
             self.clear_hints
             self.display_board
             @turn += 1
+            game_over = self.check_or_check_mate?
         end
+    end
+
+    def check_or_check_mate?
+        kings_index = self.find_kings
+        target_index = self.scan_for_targets
+        for king in kings_index do
+            if target_index.include?(king)
+                @check = true
+            else
+                @check = false
+            end
+        end
+        return false
+    end
+
+    def scan_for_targets
+        piece_indexes = self.find_all_piece_indexes
+        targets = []
+        piece_indexes.each { |piece|
+            temp_targets = self.display_eligible_moves([@game_board.grid[piece][2],piece])
+            targets += temp_targets[0]
+            self.clear_hints
+        }
+        return targets
+    end
+
+    def find_all_piece_indexes
+        pieces_index = []
+        @game_board.grid.each_with_index { |item, index|
+            if !is_spot_empty?(index)
+                pieces_index.push(index)
+            end
+        }
+        return pieces_index
+    end
+
+    def find_kings
+        kings_index = []
+        @game_board.grid.each_with_index { |item, index|
+            if item[2].instance_of? King
+                kings_index.push(index)
+            end
+        }
+        return kings_index
     end
 
     def get_user_input
         choice_made = false
         if @turn.odd?
-            puts "White: choose a piece."
+            @check ? (puts "White: choose a piece. Check is on the board.") : (puts "White: choose a piece.")
+            @turn_order = "white"
         else
-            puts "Black: choose a piece."
+            @check ? (puts "Black: choose a piece. Check is on the board.") : (puts "Black: choose a piece.")
+            @turn_order = "black"
         end
+
         until choice_made == true do
             choice = self.get_targets_and_index()
             targets = choice[0]
             index = choice[1]
             self.display_board
             if check_for_movement_options() == false && (targets.nil? || targets.empty?)
-                self.display_board
                 puts "No valid movement options. Pick another piece."
                 next
             end
@@ -143,10 +191,15 @@ class Game
     end
 
     def get_targets_and_index
-        potential_targets_with_index = self.display_eligible_moves(find_unit(get_input()))
-        targets = potential_targets_with_index[0]
-        index = potential_targets_with_index[1]
-        return [targets, index]
+        choice = find_unit(get_input())
+        if choice[0] == " " || choice[0].color != @turn_order
+            return []
+        else
+            potential_targets_with_index = self.display_eligible_moves(choice)
+            targets = potential_targets_with_index[0]
+            index = potential_targets_with_index[1]
+            return [targets, index]
+        end
     end
 
     def get_movement_input(targets, index, choice)
@@ -195,52 +248,52 @@ class Game
     def display_eligible_moves(piece)
         case piece[0]
         when Pawn
-            targets = self.show_pawn_moves(piece)
+            sum_and_targets = self.show_pawn_moves(piece)
         when Rook
-            targets = self.show_rook_moves(piece)
+            sum_and_targets = self.show_rook_moves(piece)
         when Knight
-            targets = self.show_knight_moves(piece)
+            sum_and_targets = self.show_knight_moves(piece)
         when Bishop
-            targets = self.show_bishop_moves(piece)
+            sum_and_targets = self.show_bishop_moves(piece)
         when Queen
-            targets = self.show_queen_moves(piece)
+            sum_and_targets = self.show_queen_moves(piece)
         when King
-            targets = self.show_king_moves(piece)
+            sum_and_targets = self.show_king_moves(piece)
         else
             puts "No piece found. Pick another."
         end
-        return [targets, piece[1]]
+        return [sum_and_targets[1], piece[1], sum_and_targets[0]]
     end
 
     def show_pawn_moves(piece)
         self.find_pawn_movement(piece)
-        targets = self.find_pawn_takeovers(piece)
-        return targets
+        sum_and_targets = self.find_pawn_takeovers(piece)
+        return sum_and_targets
     end
 
     def show_rook_moves(piece)
-        targets = self.find_rook_movement_and_takeovers(piece)
-        return targets
+        sum_and_targets = self.find_rook_movement_and_takeovers(piece)
+        return sum_and_targets
     end
     
     def show_knight_moves(piece)
-        targets = self.find_knight_movement_and_takeovers(piece)
-        return targets
+        sum_and_targets = self.find_knight_movement_and_takeovers(piece)
+        return sum_and_targets
     end
 
     def show_bishop_moves(piece)
-        targets = self.find_bishop_movement_and_takeovers(piece)
-        return targets
+        sum_and_targets = self.find_bishop_movement_and_takeovers(piece)
+        return sum_and_targets
     end
 
     def show_queen_moves(piece)
-        targets = self.find_queen_movement_and_takeovers(piece)
-        return targets
+        sum_and_targets = self.find_queen_movement_and_takeovers(piece)
+        return sum_and_targets
     end
 
     def show_king_moves(piece)
-        targets = self.find_king_movement_and_takeovers(piece)
-        return targets
+        sum_and_targets = self.find_king_movement_and_takeovers(piece)
+        return sum_and_targets
     end
 
     def find_rook_movement_and_takeovers(piece)
@@ -252,8 +305,7 @@ class Game
         sum += hori_response[0]
         targets += vert_response[1]
         targets += hori_response[1]
-        puts "Rook: possible takeovers: #{sum}"
-        return targets
+        return [sum,targets]
     end
 
     def find_knight_movement_and_takeovers(piece)
@@ -269,13 +321,12 @@ class Game
         move8 = find_move8(index, piece[0])
         sum = move1[0] + move2[0] + move3[0] + move4[0] + move5[0] + move6[0] + move7[0] + move8[0]
         targets.push(move1[1], move2[1], move3[1], move4[1], move5[1], move6[1], move7[1], move8[1]).compact!
-        puts "Knight: possible takeovers: #{sum}"
-        return targets
+        return [sum,targets]
     end
 
     def find_move1(index, piece)
         if index > 47 || RIGHT_EDGES.include?(index)
-            return 0
+            return [0]
         else
             spot = index + 17
             if is_spot_empty?(spot)
@@ -291,7 +342,7 @@ class Game
 
     def find_move2(index,piece)
         if index > 55 || RIGHT_EDGES.include?(index) || RIGHT_EDGES.include?(index + 1)
-            return 0
+            return [0]
         else
             spot = index + 10
             if is_spot_empty?(spot)
@@ -307,7 +358,7 @@ class Game
 
     def find_move3(index,piece)
         if index < 8 || RIGHT_EDGES.include?(index) || RIGHT_EDGES.include?(index + 1)
-            return 0
+            return [0]
         else
             spot = index - 6
             if is_spot_empty?(spot)
@@ -323,7 +374,7 @@ class Game
 
     def find_move4(index,piece)
         if index < 16 || RIGHT_EDGES.include?(index)
-            return 0
+            return [0]
         else
             spot = index - 15
             if is_spot_empty?(spot)
@@ -339,7 +390,7 @@ class Game
 
     def find_move5(index,piece)
         if index < 16 || LEFT_EDGES.include?(index)
-            return 0
+            return [0]
         else
             spot = index - 17
             if is_spot_empty?(spot)
@@ -355,7 +406,7 @@ class Game
 
     def find_move6(index,piece)
         if index < 8 || LEFT_EDGES.include?(index) || LEFT_EDGES.include?(index - 1)
-            return 0
+            return [0]
         else
             spot = index - 10
             if is_spot_empty?(spot)
@@ -371,7 +422,7 @@ class Game
 
     def find_move7(index,piece)
         if index > 55 || LEFT_EDGES.include?(index) || LEFT_EDGES.include?(index - 1)
-            return 0
+            return [0]
         else
             spot = index + 6
             if is_spot_empty?(spot)
@@ -387,7 +438,7 @@ class Game
 
     def find_move8(index,piece)
         if index > 47 || LEFT_EDGES.include?(index)
-            return 0
+            return [0]
         else
             spot = index + 15
             if is_spot_empty?(spot)
@@ -404,9 +455,8 @@ class Game
     def find_bishop_movement_and_takeovers(piece)
         targets = []
         response = find_diagonal_options(piece[0], piece[1])
-        puts "Bishop: possible takeovers: #{response[0]}"
         targets += response[1]
-        return targets
+        return [response[0], targets]
     end
 
     def find_diagonal_options(piece, index)
@@ -491,7 +541,6 @@ class Game
                 diag_marker += 7
                 next
             else
-                puts "here!"
                 if @game_board.grid[diag_marker][2].color != piece.color
                     return [1, diag_marker]
                 else
@@ -513,8 +562,7 @@ class Game
         target2 = move2[1].flatten
         target3 = move3[1].flatten
         new_targets = target1 + target2 + target3
-        puts "Queen: possible takeovers: #{sum}"
-        return new_targets
+        return [sum, new_targets]
     end
     
     def find_king_movement_and_takeovers(piece)
@@ -530,8 +578,7 @@ class Game
         move8 = find_king_move_8(piece[0], index)
         sum = move1[0] + move2[0] + move3[0] + move4[0] + move5[0] + move6[0] + move7[0] + move8[0]
         targets.push(move1[1],move2[1],move3[1],move4[1],move5[1],move6[1],move7[1],move8[1]).compact!
-        puts "King: possible takeovers: #{sum}"
-        return targets
+        return [sum, targets]
     end
 
     def find_king_move_1(piece, index)
@@ -668,7 +715,6 @@ class Game
                 @game_board.grid[marker][2] = "0"
                 return [0]
             else
-                puts "#{piece}"
                 if @game_board.grid[marker][2].color != piece.color
                     return [1,marker]
                 else
@@ -708,17 +754,18 @@ class Game
         if piece[0].color == "white"
             right_target = piece[1] + 9
             left_target = piece[1] + 7
-            targets = self.show_pawn_takeover_hint(left_target, right_target, piece)
+            sum_and_targets = self.show_pawn_takeover_hint(left_target, right_target, piece)
         else
             right_target = piece[1] - 7
             left_target = piece[1] - 9
-            targets = self.show_pawn_takeover_hint(left_target, right_target, piece)
+            sum_and_targets = self.show_pawn_takeover_hint(left_target, right_target, piece)
         end
-        return targets
+        return sum_and_targets
     end
 
     def show_pawn_takeover_hint(left_target, right_target, piece)
         targets = []
+        sum = 0
         begin
             color1 = @game_board.grid[right_target][2].color
         rescue
@@ -732,22 +779,22 @@ class Game
         end
 
         if LEFT_EDGES.include?(piece[1]) && color1 != piece[0].color
-            puts "Pawn: Possible takeovers: 1"
+            sum += 1
             targets.append(right_target)
         elsif RIGHT_EDGES.include?(piece[1]) && color2 != piece[0].color
-            puts "Pawn: Possible takeovers: 1"
+            sum += 1
             targets.append(left_target)
         elsif color1 != piece[0].color && color2 != piece[0].color
-            puts "Pawn: Possible takeovers: 2"
+            sum += 2
             targets.append(left_target, right_target)
         elsif color1 != piece[0].color
-            puts "Pawn: Possible takeovers: 1"
+            sum += 1
             targets.append(right_target)
         elsif color2 != piece[0].color
-            puts "Pawn: Possible takeovers: 1"
+            sum += 1
             targets.append(left_target)
         end
-        return targets
+        return [sum, targets]
     end
 
     def find_vertical_options(piece, index)
@@ -794,8 +841,12 @@ class Game
         sum = 0
         sum += right_response[0]
         sum += left_response[0]
-        targets.append(right_response[1])
-        targets.append(left_response[1])
+        if right_response.length == 2
+            targets.append(right_response[1])
+        end
+        if left_response.length == 2
+            targets.append(left_response[1])
+        end
         return [sum, targets]
     end
 
@@ -804,7 +855,7 @@ class Game
         end_of_line = false
         until end_of_line == true do
             if LEFT_EDGES.include?(right_marker) || right_marker > 63
-                return 0
+                return [0]
             elsif is_spot_empty?(right_marker)
                 @game_board.grid[right_marker][2] = "0"
                 right_marker += 1
@@ -823,7 +874,7 @@ class Game
         end_of_line = false
         until end_of_line == true do
             if RIGHT_EDGES.include?(left_marker) || left_marker < 0
-                return 0
+                return [0]
             elsif is_spot_empty?(left_marker)
                 @game_board.grid[left_marker][2] = "0"
                 left_marker -= 1
