@@ -103,6 +103,7 @@ class Game
         @game_board = Board.new
         @turn = 1
         @check = false
+        @winner = ''
         self.populate_board
     end
 
@@ -119,11 +120,17 @@ class Game
             @turn += 1
             game_over = self.check_or_check_mate?
         end
+        puts "#{@winner} wins!"
     end
 
     def check_or_check_mate?
         kings_index = self.find_kings
         target_index = self.scan_for_targets
+        if kings_index.length == 1
+            @winner = @game_board.grid[kings_index[0]][2].color
+            return true
+        end
+
         for king in kings_index do
             if target_index.include?(king)
                 @check = true
