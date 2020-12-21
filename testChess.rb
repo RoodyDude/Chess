@@ -111,6 +111,7 @@ class Game
         game_over = false
         puts "Welcome to Chess."
         puts "Game starting in a moment. You can select a spot on the board by typing the X and Y components like this: \"11\""
+        sleep(3)
         puts "Starting game! White goes first."
         self.display_board
         until game_over do
@@ -138,7 +139,25 @@ class Game
                 @check = false
             end
         end
+        self.find_check_mate(kings_index)
         return false
+    end
+
+    def find_check_mate(kings_index)
+        for king in kings_index do
+            results = self.display_eligible_moves([@game_board.grid[king][2], king])[0]
+            results += get_eligible_movements()
+        end
+    end
+
+    def get_eligible_movements
+        result = []
+        @game_board.grid.each_with_index { |item, index|
+            if item[2] == "0"
+                result.append(index)
+            end
+        }
+        return result
     end
 
     def scan_for_targets
