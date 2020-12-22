@@ -132,13 +132,12 @@ class Game
             return true
         end
 
-        for king in kings_index do
-            if target_index.include?(king)
-                @check = true
-            else
-                @check = false
-            end
+        if target_index.include?(kings_index[0]) || target_index.include?(kings_index[1])
+            @check = true
+        else
+            @check = false
         end
+        
         self.find_check_mate(kings_index)
         return false
     end
@@ -233,7 +232,6 @@ class Game
         when Queen
             puts "Queen: Possible takeovers: #{amount}"
         else
-            
         end
     end
 
