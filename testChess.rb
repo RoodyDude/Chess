@@ -144,10 +144,10 @@ class Game
     end
 
     def find_check_mate(kings_index)
-        for king in kings_index do
-            results = self.display_eligible_moves([@game_board.grid[king][2], king])[0]
-            results += get_eligible_movements()
-        end
+        #for king in kings_index do
+        #    results = self.display_eligible_moves([@game_board.grid[king][2], king])[0]
+        #    results += get_eligible_movements()
+        #end
     end
 
     def get_eligible_movements
@@ -205,14 +205,35 @@ class Game
             choice = self.get_targets_and_index()
             targets = choice[0]
             index = choice[1]
+            sum = choice[2]
             self.display_board
             if check_for_movement_options() == false && (targets.nil? || targets.empty?)
                 puts "No valid movement options. Pick another piece."
                 next
             end
-            
+            self.show_takeover_hint(sum, index)
+            self.display_board
             puts "Choose a spot to move."
             choice_made = self.get_movement_input(targets, index, find_unit(get_input()))
+        end
+    end
+
+    def show_takeover_hint(amount, index)
+        case @game_board.grid[index][2]
+        when Pawn
+            puts "Pawn: Possible takeovers: #{amount}"
+        when Rook
+            puts "Rook: Possible takeovers: #{amount}"
+        when Knight
+            puts "Knight: Possible takeovers: #{amount}"
+        when Bishop
+            puts "Bishop: Possible takeovers: #{amount}"
+        when King
+            puts "King: Possible takeovers: #{amount}"
+        when Queen
+            puts "Queen: Possible takeovers: #{amount}"
+        else
+            
         end
     end
 
@@ -224,7 +245,8 @@ class Game
             potential_targets_with_index = self.display_eligible_moves(choice)
             targets = potential_targets_with_index[0]
             index = potential_targets_with_index[1]
-            return [targets, index]
+            sum = potential_targets_with_index[2]
+            return [targets, index, sum]
         end
     end
 
@@ -775,7 +797,7 @@ class Game
 
     def find_pawn_takeovers(piece)
         if piece[1] < 8 || piece[1] > 55
-            return
+            return []
         end
         if piece[0].color == "white"
             right_target = piece[1] + 9
