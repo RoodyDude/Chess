@@ -119,34 +119,59 @@ class Game
             self.clear_hints
             self.display_board
             @turn += 1
-            game_over = self.check_or_check_mate?
+            game_over = self.game_ending?
         end
         puts "#{@winner} wins!"
     end
 
-    def check_or_check_mate?
+    def game_ending?
+        check_mate = false
+        #if kings_index.length == 1
+        #    @winner = @game_board.grid[kings_index[0]][2].color
+        #    check_mate = true
+        #end
+
+
+        is_a_check = self.check_for_check
+        @check = is_a_check[0]
+        check_mate = find_check_mate(is_a_check[1])
+        return check_mate
+    end
+    
+    def check_for_check
         kings_index = self.find_kings
         target_index = self.scan_for_targets
-        if kings_index.length == 1
-            @winner = @game_board.grid[kings_index[0]][2].color
-            return true
-        end
-
-        if target_index.include?(kings_index[0]) || target_index.include?(kings_index[1])
-            @check = true
+        if target_index.include?(kings_index[0]) 
+            return [true, kings_index[0]]
+        elsif target_index.include?(kings_index[1])
+            return [true, kings_index[1]]
         else
-            @check = false
+            return [false, nil]
         end
-        
-        self.find_check_mate(kings_index)
-        return false
     end
 
-    def find_check_mate(kings_index)
-        #for king in kings_index do
-        #    results = self.display_eligible_moves([@game_board.grid[king][2], king])[0]
-        #    results += get_eligible_movements()
-        #end
+    def find_check_mate(king)
+        if king.nil?
+            return false
+        else
+            movements = self.display_eligible_moves([@game_board.grid[king][2], king])[0]
+            movements += self.get_eligible_movements
+            self.clear_hints
+        end
+
+        for movement in movements do
+            replaced_piece = self.move_piece(king, movement)
+            response = self.check_for_check
+            if response[0] == false
+                self.move_piece(movement, king)
+                @game_board.grid[movement][2] = replaced_piece
+                return false
+            end
+            self.move_piece(movement, king)
+            @game_board.grid[movement][2] = replaced_piece
+        end
+        @winner = @turn_order
+        return true
     end
 
     def get_eligible_movements
@@ -949,8 +974,10 @@ class Game
     end
 
     def move_piece(start, finish)
+        replaced_piece = @game_board.grid[finish][2]
         @game_board.grid[finish][2] = @game_board.grid[start].delete_at(2)
         @game_board.grid[start].push(" ")
+        return replaced_piece
     end
 
     def populate_board
