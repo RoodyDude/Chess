@@ -131,7 +131,7 @@ class Game
     #self.clear_hints
     #movement_options[piece_index, target_location]
     #select a random movement_option
-
+    #adding another comment
     
     def get_user_input
         choice_made = false
