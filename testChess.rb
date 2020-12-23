@@ -121,36 +121,33 @@ class Game
             @turn += 1
             game_over = self.game_ending?
         end
-        puts "#{@winner} wins!"
+        puts "#{@winner.capitalize} wins!"
     end
 
     def game_ending?
         check_mate = false
-        #if kings_index.length == 1
-        #    @winner = @game_board.grid[kings_index[0]][2].color
-        #    check_mate = true
-        #end
-
-
         is_a_check = self.check_for_check
         @check = is_a_check[0]
-        check_mate = find_check_mate(is_a_check[1])
+        check_mate = find_check_mate(is_a_check[1], is_a_check[2], is_a_check[3])
         return check_mate
     end
     
     def check_for_check
         kings_index = self.find_kings
-        target_index = self.scan_for_targets
-        if target_index.include?(kings_index[0]) 
-            return [true, kings_index[0]]
-        elsif target_index.include?(kings_index[1])
-            return [true, kings_index[1]]
+        target_and_attacker_index1 = self.scan_for_targets_and_attackers(kings_index[0])
+        target_and_attacker_index2 = self.scan_for_targets_and_attackers(kings_index[1])
+        if target_and_attacker_index1[0].include?(kings_index[0]) 
+            return [true, kings_index[0], target_and_attacker_index1[0], target_and_attacker_index1[1]]
+        elsif target_and_attacker_index2[0].include?(kings_index[1])
+            return [true, kings_index[1], target_and_attacker_index2[0], target_and_attacker_index2[1]]
         else
-            return [false, nil]
+            return [false, nil, nil, nil]
         end
     end
 
-    def find_check_mate(king)
+    def find_check_mate(king, targets, attackers)
+        puts "targets: #{targets}"
+        puts "attackers: #{attackers}"
         if king.nil?
             return false
         else
@@ -170,6 +167,13 @@ class Game
             self.move_piece(movement, king)
             @game_board.grid[movement][2] = replaced_piece
         end
+        
+        for attacker in attackers do
+            if targets.include?(attacker)
+                return false
+            end
+        end
+
         @winner = @turn_order
         return true
     end
@@ -184,15 +188,19 @@ class Game
         return result
     end
 
-    def scan_for_targets
+    def scan_for_targets_and_attackers(king=nil)
         piece_indexes = self.find_all_piece_indexes
         targets = []
+        attackers = []
         piece_indexes.each { |piece|
             temp_targets = self.display_eligible_moves([@game_board.grid[piece][2],piece])
+            if temp_targets[0].include?(king)
+                attackers.push(piece)
+            end
             targets += temp_targets[0]
             self.clear_hints
         }
-        return targets
+        return [targets, attackers]
     end
 
     def find_all_piece_indexes
