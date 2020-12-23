@@ -124,6 +124,14 @@ class Game
         puts "#{@winner.capitalize} wins!"
     end
 
+    #create computer player using these: 
+    #self.get_black_pieces(find_all_piece_indexes) to get a list of indexes where black pieces are located
+    #movements = self.display_eligible_moves([@game_board.grid[pieces][2], pieces])[2] ///// returns [sum, index, targets],and puts "0" on the board for movement hints
+    #movements += self.get_eligible_movements ////// gets a list of all eligible movement optinos
+    #self.clear_hints
+    #movement_options[piece_index, target_location]
+    #select a random movement_option
+
     
     def get_user_input
         choice_made = false
