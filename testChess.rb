@@ -125,6 +125,10 @@ class Game
     end
 
     def game_ending?
+        if self.find_kings().length == 1
+            @winner = @turn_order
+            return true
+        end
         check_mate = false
         is_a_check = self.check_for_check
         @check = is_a_check[0]
@@ -146,8 +150,6 @@ class Game
     end
 
     def find_check_mate(king, targets, attackers)
-        puts "targets: #{targets}"
-        puts "attackers: #{attackers}"
         if king.nil?
             return false
         else
