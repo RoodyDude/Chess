@@ -993,7 +993,6 @@ class Game
     end
     
     def move_piece(start, finish)
-        if @game_piece.grid[start][2].instance_of? Pawn
         replaced_piece = @game_board.grid[finish][2]
         @game_board.grid[finish][2] = @game_board.grid[start].delete_at(2)
         @game_board.grid[start].push(" ")
