@@ -884,9 +884,9 @@ class Game
             return true
         end
         check_mate = false
-        is_a_check = self.check_for_check
-        @check = is_a_check[0]
-        check_mate = find_check_mate(is_a_check[1], is_a_check[2], is_a_check[3])
+        response = self.check_for_check
+        @check = response[0]
+        check_mate = find_check_mate(response[1])
         return check_mate
     end
     
@@ -895,41 +895,45 @@ class Game
         target_and_attacker_index1 = self.scan_for_targets_and_attackers(kings_index[0])
         target_and_attacker_index2 = self.scan_for_targets_and_attackers(kings_index[1])
         if target_and_attacker_index1[0].include?(kings_index[0]) 
-            return [true, kings_index[0], target_and_attacker_index1[0], target_and_attacker_index1[1]]
+            return [true, kings_index[0]]
         elsif target_and_attacker_index2[0].include?(kings_index[1])
-            return [true, kings_index[1], target_and_attacker_index2[0], target_and_attacker_index2[1]]
+            return [true, kings_index[1]]
         else
-            return [false, nil, nil, nil]
+            return [false, nil]
         end
     end
 
-    def find_check_mate(king, targets, attackers)
-        if king.nil?
+    def find_check_mate(checked_king)
+        if @check == false
             return false
         else
-            movements = self.display_eligible_moves([@game_board.grid[king][2], king])[0]
-            movements += self.get_eligible_movements
-            self.clear_hints
-        end
-
-        for movement in movements do
-            replaced_piece = self.move_piece(king, movement)
-            response = self.check_for_check
-            if response[0] == false
-                self.move_piece(movement, king)
-                @game_board.grid[movement][2] = replaced_piece
-                return false
+            king_color = @game_board.grid[checked_king][2].color
+            pieces = self.find_all_piece_indexes
+            movements = []
+            if king_color == "white"
+                piece_list = pieces[1]
+            else 
+                piece_list = pieces[2]
             end
-            self.move_piece(movement, king)
-            @game_board.grid[movement][2] = replaced_piece
-        end
-        
-        for attacker in attackers do
-            if targets.include?(attacker)
-                return false
+
+            for piece in piece_list do
+                movements = self.display_eligible_moves([@game_board.grid[piece][2], piece])[0]
+                movements += self.get_eligible_movements
+                self.clear_hints
+                for movement in movements do
+                    replaced_piece = self.move_piece(piece, movement)
+                    response = self.check_for_check
+                    if response[0] == false
+                        self.move_piece(movement, piece)
+                        @game_board.grid[movement][2] = replaced_piece
+                        return false
+                    end
+                    self.move_piece(movement, piece)
+                    @game_board.grid[movement][2] = replaced_piece
+                end
+                movements = movements.clear()
             end
         end
-
         @winner = @turn_order
         return true
     end
@@ -948,7 +952,7 @@ class Game
         piece_indexes = self.find_all_piece_indexes
         targets = []
         attackers = []
-        piece_indexes.each { |piece|
+        piece_indexes[0].each { |piece|
             temp_targets = self.display_eligible_moves([@game_board.grid[piece][2],piece])
             if temp_targets[0].include?(king)
                 attackers.push(piece)
@@ -960,13 +964,20 @@ class Game
     end
 
     def find_all_piece_indexes
+        white_index = []
+        black_index = []
         pieces_index = []
         @game_board.grid.each_with_index { |item, index|
             if !is_spot_empty?(index)
                 pieces_index.push(index)
+                if item[2].color == "white"
+                    white_index.push(index)
+                elsif item[2].color == "black"
+                    black_index.push(index)
+                end
             end
         }
-        return pieces_index
+        return [pieces_index, white_index, black_index]
     end
 
     def find_kings
