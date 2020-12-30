@@ -105,16 +105,48 @@ class Game
         @check = false
         @winner = ''
         self.populate_board
+        puts "Welcome to Chess."
     end
 
-    def start_game
+    def configure_game
+        sleep(2)
+        puts
+        puts "Select Game Type:"
+        puts
+        puts "Player vs Player              (1)"
+        puts
+        puts "Player vs Computer            (2)"
+        game_type = gets.chomp
+        if game_type == "1"
+            self.start_pvp_game
+        elsif game_type == "2"
+            self.start_pvc_game
+        else
+            puts "Select a valid game type."
+            self.configure_game
+        end
+    end
+    
+    def start_pvc_game
         game_over = false
-        puts "Welcome to Chess."
-        puts "Game starting in a moment. You can select a spot on the board by typing the X and Y components like this: \"11\""
-        sleep(3)
-        puts "Starting game! White goes first."
-        self.display_board
+        self.initialize_game
         until game_over do
+            self.update_turn_order
+            @turn.odd? ? self.get_user_input : self.get_computer_input
+            self.clear_hints
+            self.display_board
+            @turn += 1
+            game_over = self.game_ending?
+        end
+        puts "#{@winner.capitalize} wins!"
+    end
+
+    
+    def start_pvp_game
+        game_over = false
+        self.initialize_game
+        until game_over do
+            self.update_turn_order
             self.get_user_input
             self.clear_hints
             self.display_board
@@ -122,6 +154,25 @@ class Game
             game_over = self.game_ending?
         end
         puts "#{@winner.capitalize} wins!"
+    end
+    
+    def initialize_game
+        puts "Game starting..."
+        sleep(1)
+        puts "You can select a spot on the board by typing the X and Y components like this: \"11\""
+        sleep(3)
+        puts "Starting game! White goes first."
+        self.display_board
+    end
+
+    def update_turn_order
+        if @turn.odd?
+            @check ? (puts "White: choose a piece. Check is on the board.") : (puts "White: choose a piece.")
+            @turn_order = "white"
+        else
+            @check ? (puts "Black: choose a piece. Check is on the board.") : (puts "Black: choose a piece.")
+            @turn_order = "black"
+        end
     end
 
     #create computer player using these: 
@@ -133,16 +184,30 @@ class Game
     #select a random movement_option
     #adding another comment
     
+    def get_computer_input
+        self.find_eligible_computer_movements
+    end
+    
+    def find_eligible_computer_movements
+        pieces = self.find_all_piece_indexes[2]
+        puts "#{pieces}"
+        move_options = []
+        for piece in pieces do
+            movements = self.display_eligible_moves([@game_board.grid[piece][2], piece])[0]
+            movements += self.get_eligible_movements
+            self.clear_hints
+            if movements.empty?
+                movements = []
+                next
+            else
+                move_options.push([piece, movements])
+            end
+        end
+        puts "#{move_options}"
+    end
+
     def get_user_input
         choice_made = false
-        if @turn.odd?
-            @check ? (puts "White: choose a piece. Check is on the board.") : (puts "White: choose a piece.")
-            @turn_order = "white"
-        else
-            @check ? (puts "Black: choose a piece. Check is on the board.") : (puts "Black: choose a piece.")
-            @turn_order = "black"
-        end
-        
         until choice_made == true do
             choice = self.get_targets_and_index()
             targets = choice[0]
@@ -1080,4 +1145,4 @@ class Game
     end
 end
 game = Game.new
-game.start_game
+game.configure_game
