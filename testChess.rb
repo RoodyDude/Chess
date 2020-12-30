@@ -193,8 +193,19 @@ class Game
     
     def get_movement_input(targets, index, choice)
         if targets.include?(choice[1]) || @game_board.grid[choice[1]][2] == "0"
-            self.move_piece(index, choice[1])
-            return true
+            replaced_piece = self.move_piece(index, choice[1])
+            self.clear_hints
+            response = self.check_for_check
+            if response[0] == true && @game_board.grid[response[1]][2].color == @turn_order
+                self.move_piece(choice[1], index)
+                @game_board.grid[choice[1]][2] = replaced_piece
+                self.clear_hints
+                self.display_board
+                puts "Can't move yourself into check! Select another piece."
+                return false
+            else
+                return true
+            end
         else
             self.clear_hints
             self.display_board
