@@ -185,7 +185,16 @@ class Game
     #adding another comment
     
     def get_computer_input
-        self.find_eligible_computer_movements
+        eligible_movements = self.find_eligible_computer_movements
+        random_piece = get_random_piece(eligible_movements)
+    end
+
+    def get_random_piece(eligible_movements)
+        pieces = []
+        eligible_movements.each { |item|
+            pieces.push(item[0])
+        }
+        return pieces.sample
     end
     
     def find_eligible_computer_movements
@@ -203,7 +212,7 @@ class Game
                 move_options.push([piece, movements])
             end
         end
-        puts "#{move_options}"
+        return move_options
     end
 
     def get_user_input
