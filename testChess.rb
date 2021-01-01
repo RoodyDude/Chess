@@ -191,24 +191,18 @@ class Game
             @turn_order = "black"
         end
     end
-
-    #create computer player using these: 
-    #self.get_black_pieces(find_all_piece_indexes) to get a list of indexes where black pieces are located
-    #movements = self.display_eligible_moves([@game_board.grid[pieces][2], pieces])[2] ///// returns [sum, index, targets],and puts "0" on the board for movement hints
-    #movements += self.get_eligible_movements ////// gets a list of all eligible movement optinos
-    #self.clear_hints
-    #movement_options[piece_index, target_location]
-    #select a random movement_option
-    #adding another comment
     
     def get_computer_input
         eligible_movements = self.find_eligible_computer_movements
         random_movement = get_random_movement(eligible_movements)
         puts "movement selection: #{random_movement}"
+        if random_movement.nil?
+            return
+        end
         self.display_eligible_moves([@game_board.grid[random_movement[0]][2], random_movement[0]])
-        sleep(5)
+        sleep(1)
         self.display_board
-        sleep(5)
+        sleep(1)
         self.move_piece(random_movement[0], random_movement[1])
     end
 
@@ -317,7 +311,7 @@ class Game
     end
     
     def remove_check_movements(piece_index, movements)
-        if movements.empty?
+        if movements.nil? || movements.empty?
             return []
         end
         eligible_movements = []
@@ -329,6 +323,8 @@ class Game
                 @game_board.grid[movement][2] = replaced_piece
                 eligible_movements.push(movement)
             else
+                self.move_piece(movement, piece_index)
+                @game_board.grid[movement][2] = replaced_piece
                 next
             end
         end
@@ -899,12 +895,20 @@ class Game
             color2 = piece[0].color
         end
         
-        if LEFT_EDGES.include?(piece[1]) && color1 != piece[0].color
-            sum += 1
-            targets.append(right_target)
-        elsif RIGHT_EDGES.include?(piece[1]) && color2 != piece[0].color
-            sum += 1
-            targets.append(left_target)
+        if LEFT_EDGES.include?(piece[1])
+            if color1 != piece[0].color
+                sum += 1
+                targets.append(right_target)
+            else
+                return [sum, targets]
+            end
+        elsif RIGHT_EDGES.include?(piece[1])
+            if color2 != piece[0].color
+                sum += 1
+                targets.append(left_target)
+            else
+                return [sum, targets]
+            end
         elsif color1 != piece[0].color && color2 != piece[0].color
             sum += 2
             targets.append(left_target, right_target)
@@ -1086,6 +1090,11 @@ class Game
         attackers = []
         piece_indexes[0].each { |piece|
             temp_targets = self.display_eligible_moves([@game_board.grid[piece][2],piece])
+            if temp_targets[0].nil?
+                self.clear_hints
+                next
+            end
+
             if temp_targets[0].include?(king)
                 attackers.push(piece)
             end
