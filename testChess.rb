@@ -116,11 +116,15 @@ class Game
         puts "Player vs Player              (1)"
         puts
         puts "Player vs Computer            (2)"
+        puts
+        puts "Computer vs Computer          (3)"
         game_type = gets.chomp
         if game_type == "1"
             self.start_pvp_game
         elsif game_type == "2"
             self.start_pvc_game
+        elsif game_type == "3"
+            self.start_cvc_game
         else
             puts "Select a valid game type."
             self.configure_game
@@ -141,7 +145,20 @@ class Game
         puts "#{@winner.capitalize} wins!"
     end
 
-    
+    def start_cvc_game
+        game_over = false
+        self.initialize_game
+        until game_over do
+            self.update_turn_order
+            self.get_computer_input
+            self.clear_hints
+            self.display_board
+            @turn += 1
+            game_over = self.game_ending?
+        end
+        puts "#{@winner.capitalize} wins!"
+    end
+
     def start_pvp_game
         game_over = false
         self.initialize_game
@@ -186,56 +203,44 @@ class Game
     
     def get_computer_input
         eligible_movements = self.find_eligible_computer_movements
-        puts "eligible movements: #{eligible_movements}"
-        random_piece = get_random_piece(eligible_movements)
-        puts "random piece: #{random_piece}"
-        random_movement = get_random_movement(random_piece, eligible_movements)
-        puts "random move: #{random_movement}"
+        random_movement = get_random_movement(eligible_movements)
+        puts "movement selection: #{random_movement}"
+        self.display_eligible_moves([@game_board.grid[random_movement[0]][2], random_movement[0]])
+        sleep(5)
+        self.display_board
+        sleep(5)
+        self.move_piece(random_movement[0], random_movement[1])
     end
 
-    def get_random_piece(eligible_movements)
-        pieces = []
-        eligible_movements.each { |item|
-            pieces.push(item[0])
-        }
-        return pieces.sample
-    end
-
-    def get_random_movement(random_piece, eligible_movements)
-        #eligible_movements.each { |piece|
-        #    if piece[0] == random_piece
-        #        targets = piece[1]
-        #        if targets.nil?
-        #            targets = []
-        #        elsif targets.length == 1
-        #            targets = 
-
-        #    end
-        #}
-        #return response
+    def get_random_movement(eligible_movements)
+        if eligible_movements[0].empty?
+            return eligible_movements[1].sample
+        else
+            return eligible_movements[0].sample
+        end
     end
     
     def find_eligible_computer_movements
-        pieces = self.find_all_piece_indexes[2]
-        puts "pieces: #{pieces}"
+        @turn_order == "white" ? pieces = self.find_all_piece_indexes[1] : pieces = self.find_all_piece_indexes[2]
         target_options = []
-        move_options = []
-        list = []
+        movement_options = []
         for piece in pieces do
             targets = self.display_eligible_moves([@game_board.grid[piece][2], piece])[0]
             movements = self.get_eligible_movements
             self.clear_hints
             targets = self.remove_check_movements(piece, targets)
             movements = self.remove_check_movements(piece, movements)
-            if movements.empty? && targets.empty?
-                movements = []
-                targets = []
-                next
-            else
-                list.push([piece, targets, movements])
+            if !targets.empty?
+                for target in targets do
+                    target_options.push([piece, target])
+                end
+            elsif !movements.empty?
+                for movement in movements do
+                    movement_options.push([piece, movement])
+                end
             end
         end
-        return list
+        return [target_options, movement_options]
     end
 
     def get_user_input
@@ -349,7 +354,7 @@ class Game
     
     def get_input
         choice = gets.chomp.split('').map(&:to_i).map { |x| x - 1 }
-        choice
+        return choice
     end
     
     def find_unit(choice)
