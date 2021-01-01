@@ -186,7 +186,11 @@ class Game
     
     def get_computer_input
         eligible_movements = self.find_eligible_computer_movements
+        puts "eligible movements: #{eligible_movements}"
         random_piece = get_random_piece(eligible_movements)
+        puts "random piece: #{random_piece}"
+        random_movement = get_random_movement(random_piece, eligible_movements)
+        puts "random move: #{random_movement}"
     end
 
     def get_random_piece(eligible_movements)
@@ -196,23 +200,42 @@ class Game
         }
         return pieces.sample
     end
+
+    def get_random_movement(random_piece, eligible_movements)
+        #eligible_movements.each { |piece|
+        #    if piece[0] == random_piece
+        #        targets = piece[1]
+        #        if targets.nil?
+        #            targets = []
+        #        elsif targets.length == 1
+        #            targets = 
+
+        #    end
+        #}
+        #return response
+    end
     
     def find_eligible_computer_movements
         pieces = self.find_all_piece_indexes[2]
-        puts "#{pieces}"
+        puts "pieces: #{pieces}"
+        target_options = []
         move_options = []
+        list = []
         for piece in pieces do
-            movements = self.display_eligible_moves([@game_board.grid[piece][2], piece])[0]
-            movements += self.get_eligible_movements
+            targets = self.display_eligible_moves([@game_board.grid[piece][2], piece])[0]
+            movements = self.get_eligible_movements
             self.clear_hints
-            if movements.empty?
+            targets = self.remove_check_movements(piece, targets)
+            movements = self.remove_check_movements(piece, movements)
+            if movements.empty? && targets.empty?
                 movements = []
+                targets = []
                 next
             else
-                move_options.push([piece, movements])
+                list.push([piece, targets, movements])
             end
         end
-        return move_options
+        return list
     end
 
     def get_user_input
@@ -288,6 +311,25 @@ class Game
         end
     end
     
+    def remove_check_movements(piece_index, movements)
+        if movements.empty?
+            return []
+        end
+        eligible_movements = []
+        for movement in movements do
+            replaced_piece = self.move_piece(piece_index, movement)
+            response = self.check_for_check
+            if response[0] == false
+                self.move_piece(movement, piece_index)
+                @game_board.grid[movement][2] = replaced_piece
+                eligible_movements.push(movement)
+            else
+                next
+            end
+        end
+        return eligible_movements
+    end
+
     def check_for_movement_options
         for item in @game_board.grid do
             if item[2] == "0"
