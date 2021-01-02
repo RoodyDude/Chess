@@ -192,6 +192,10 @@ class Game
         end
     end
     
+#update pawn movement to upgrade when reaching other side, and to only move once after moving for the first time
+
+
+
     def get_computer_input
         eligible_movements = self.find_eligible_computer_movements
         random_movement = get_random_movement(eligible_movements)
