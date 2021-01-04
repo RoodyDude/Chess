@@ -163,36 +163,7 @@ class Game
         puts "#{@winner.capitalize} wins!"
     end
 
-    def update_pawns
-        pawns = get_unmoved_pawn_indexes()
-        for pawn in pawns[0] do
-            if !WHITE_PAWN_LOCATIONS.include? pawn
-                @game_board.grid[pawn][2].moved = true
-            end
-        end
-
-        for pawn in pawns[1] do
-            if !BLACK_PAWN_LOCATIONS.include? pawn
-                @game_board.grid[pawn][2].moved = true
-            end
-        end
-    end
-
-    def get_unmoved_pawn_indexes
-        white_pawn_index = []
-        black_pawn_index = []
-        @game_board.grid.each_with_index { |item, index|
-            if item[2].instance_of? Pawn
-                if item[2].color == "white" && item[2].moved == false
-                    white_pawn_index.push(index)
-                elsif item[2].color == "black" && item[2].moved == false
-                    black_pawn_index.push(index)
-                end
-            end
-        }
-        return [white_pawn_index, black_pawn_index]
-    end
-
+    
     def start_pvp_game
         game_over = false
         self.initialize_game
@@ -216,7 +187,7 @@ class Game
         puts "Starting game! White goes first."
         self.display_board
     end
-
+    
     def update_turn_order
         if @turn.odd?
             @check ? (puts "White: choose a piece. Check is on the board.") : (puts "White: choose a piece.")
@@ -227,10 +198,10 @@ class Game
         end
     end
     
-#update pawn movement to upgrade when reaching other side, and to only move once after moving for the first time
-
-
-
+    #update pawn movement to upgrade when reaching other side, and to only move once after moving for the first time
+    
+    
+    
     def get_computer_input
         eligible_movements = self.find_eligible_computer_movements
         random_movement = get_random_movement(eligible_movements)
@@ -243,7 +214,7 @@ class Game
         sleep(3)
         self.move_piece(random_movement[0], random_movement[1])
     end
-
+    
     def get_random_movement(eligible_movements)
         if eligible_movements[0].empty?
             return eligible_movements[1].sample
@@ -274,7 +245,7 @@ class Game
         end
         return [target_options, movement_options]
     end
-
+    
     def get_user_input
         choice_made = false
         until choice_made == true do
@@ -368,7 +339,7 @@ class Game
         end
         return eligible_movements
     end
-
+    
     def check_for_movement_options
         for item in @game_board.grid do
             if item[2] == "0"
@@ -1187,6 +1158,36 @@ class Game
         @game_board.grid[finish][2] = @game_board.grid[start].delete_at(2)
         @game_board.grid[start].push(" ")
         return replaced_piece
+    end
+
+    def update_pawns
+        pawns = get_unmoved_pawn_indexes()
+        for pawn in pawns[0] do
+            if !WHITE_PAWN_LOCATIONS.include? pawn
+                @game_board.grid[pawn][2].moved = true
+            end
+        end
+
+        for pawn in pawns[1] do
+            if !BLACK_PAWN_LOCATIONS.include? pawn
+                @game_board.grid[pawn][2].moved = true
+            end
+        end
+    end
+
+    def get_unmoved_pawn_indexes
+        white_pawn_index = []
+        black_pawn_index = []
+        @game_board.grid.each_with_index { |item, index|
+            if item[2].instance_of? Pawn
+                if item[2].color == "white" && item[2].moved == false
+                    white_pawn_index.push(index)
+                elsif item[2].color == "black" && item[2].moved == false
+                    black_pawn_index.push(index)
+                end
+            end
+        }
+        return [white_pawn_index, black_pawn_index]
     end
     
     def populate_board
