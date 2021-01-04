@@ -1,6 +1,8 @@
 #command-line chess 
 LEFT_EDGES = [0,8,16,24,32,40,48,56]
 RIGHT_EDGES = [7,15,23,31,39,47,55,63]
+TOP_EDGES = [56,57,58,59,60,61,62,63]
+BOTTOM_EDGES = [0,1,2,3,4,5,6,7]
 WHITE_PAWN_LOCATIONS = [8,9,10,11,12,13,14,15]
 BLACK_PAWN_LOCATIONS = [48,49,50,51,52,53,54,55]
 
@@ -79,8 +81,12 @@ end
 
 class Board
     attr_accessor :grid
-    def initialize
-        @grid = create_board()
+    def initialize(saved_board=nil)
+        if saved_board.nil?
+            @grid = create_board()
+        else
+            @grid = create_saved_board(saved_board)
+        end
     end
 
     def create_board
@@ -98,16 +104,73 @@ class Board
         end
         grid
     end
+
+    def create_saved_board(saved_board)
+        grid = []
+        saved_board[0] = ''
+        saved_board = saved_board.split("], [")
+        for grid_item in saved_board do
+            grid_item = grid_item.split(",")
+            x = grid_item[0].to_i
+            grid_item[1].slice!(0).to_i
+            y = grid_item[1]
+            grid_item[2].slice!(0)
+            case grid_item[2].to_s
+                when "Rook"
+                    grid_item[3].slice!(0)
+                    grid_item[3].slice!(0)
+                    grid_item[3].chop!
+                    z = Rook.new(grid_item[3]) 
+                when "Knight"
+                    grid_item[3].slice!(0)
+                    grid_item[3].slice!(0)
+                    grid_item[3].chop!
+                    z = Rook.new(grid_item[3])
+                when "Bishop"
+                    grid_item[3].slice!(0)
+                    grid_item[3].slice!(0)
+                    grid_item[3].chop!
+                    z = Bishop.new(grid_item[3])
+                when "Queen"
+                    grid_item[3].slice!(0)
+                    grid_item[3].slice!(0)
+                    grid_item[3].chop!
+                    z = Queen.new(grid_item[3])
+                when "King"
+                    grid_item[3].slice!(0)
+                    grid_item[3].slice!(0)
+                    grid_item[3].chop!
+                    z = King.new(grid_item[3])
+                when "Pawn"
+                    grid_item[3].slice!(0)
+                    grid_item[3].slice!(0)
+                    grid_item[3].chop!
+                    z = Pawn.new(grid_item[3])
+                else
+                    z = " "
+                end
+            grid.push([x,y.to_i,z])
+        end
+        return grid
+    end
 end
 
 class Game
     def initialize
-        @game_board = Board.new
-        @turn = 1
-        @check = false
-        @winner = ''
-        self.populate_board
         puts "Welcome to Chess."
+        response = self.read_save_state
+        if response[0] == false
+            @game_board = Board.new
+            @turn = 1
+            @check = false
+            @winner = ''
+            self.populate_board
+        else
+            @game_board = Board.new(response[1][0])
+            @turn_order = response[1][1]
+            @check = response[1][2] == "false" ? false : true
+            @turn = response[1][3].to_i
+        end
     end
 
     def configure_game
@@ -140,8 +203,8 @@ class Game
             self.update_turn_order
             @turn.odd? ? self.get_user_input : self.get_computer_input
             self.clear_hints
-            self.display_board
             self.update_pawns
+            self.display_board
             @turn += 1
             game_over = self.game_ending?
         end
@@ -155,8 +218,8 @@ class Game
             self.update_turn_order
             self.get_computer_input
             self.clear_hints
-            self.display_board
             self.update_pawns
+            self.display_board
             @turn += 1
             game_over = self.game_ending?
         end
@@ -171,8 +234,8 @@ class Game
             self.update_turn_order
             self.get_user_input
             self.clear_hints
-            self.display_board
             self.update_pawns
+            self.display_board
             @turn += 1
             game_over = self.game_ending?
         end
@@ -197,11 +260,7 @@ class Game
             @turn_order = "black"
         end
     end
-    
-    #update pawn movement to upgrade when reaching other side, and to only move once after moving for the first time
-    
-    
-    
+
     def get_computer_input
         eligible_movements = self.find_eligible_computer_movements
         random_movement = get_random_movement(eligible_movements)
@@ -358,10 +417,15 @@ class Game
     end
     
     def get_input
-        choice = gets.chomp.split('').map(&:to_i).map { |x| x - 1 }
+        choice = gets.chomp
+        if choice == "save"
+            self.save_game
+        else
+            choice = choice.split('').map(&:to_i).map { |x| x - 1 }
+        end
         return choice
     end
-    
+
     def find_unit(choice)
         @game_board.grid.each_with_index do |x, index|
             if x[0] == choice[0] && x[1] == choice[1]
@@ -1162,6 +1226,28 @@ class Game
 
     def update_pawns
         pawns = get_unmoved_pawn_indexes()
+        self.check_for_moved_pawns(pawns)
+        self.check_for_pawn_upgrades
+    end
+
+    def check_for_pawn_upgrades
+        TOP_EDGES.each { |index|
+            if @game_board.grid[index][2].instance_of? Pawn
+                puts "Upgrading Pawn to Queen..."
+                @game_board.grid[index][2] = Queen.new("white")
+                break
+            end
+        }
+        BOTTOM_EDGES.each { |index|
+            if @game_board.grid[index][2].instance_of? Pawn
+                puts "Upgrading Pawn to Queen..."
+                @game_board.grid[index][2] = Queen.new("black")
+                break
+            end
+        }
+    end
+
+    def check_for_moved_pawns(pawns)
         for pawn in pawns[0] do
             if !WHITE_PAWN_LOCATIONS.include? pawn
                 @game_board.grid[pawn][2].moved = true
@@ -1188,6 +1274,48 @@ class Game
             end
         }
         return [white_pawn_index, black_pawn_index]
+    end
+
+    def read_save_state
+        if !File.zero?("savefile.txt")
+            file = File.open("savefile.txt")
+            save_state = file.read.split('|')
+            save_state[0].slice!(0)
+            save_state[0].chop!
+            save_state[0].chop!
+            puts "Save file found. Would you like to load? Y/N"
+            response = gets.chomp
+            if response.to_s.upcase == "Y"
+                puts "Resuming game... "
+                return [true, save_state]
+            else
+                puts
+                puts "Starting new game..."
+                return [false, nil]
+            end
+        else 
+            puts
+            puts "No save file found. Starting new game..."
+            puts
+            return [false, nil]
+        end
+    end 
+
+    def save_game
+        self.clear_hints
+        save = File.open("savefile.txt", "w")
+        game_board_save = []
+        @game_board.grid.each_with_index { |item, index|
+            if !is_spot_empty?(index)
+                game_board_save.push([item[0],item[1],item[2].class,item[2].color])
+            else
+                game_board_save.push([item[0],item[1],item[2]])
+            end
+        }
+        save.puts "#{game_board_save}|#{@turn_order}|#{@check}|#{@turn}"
+        save.close
+        puts "Saving Game... bye!"
+        exit
     end
     
     def populate_board
