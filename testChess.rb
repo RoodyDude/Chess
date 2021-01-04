@@ -1,6 +1,8 @@
 #command-line chess 
 LEFT_EDGES = [0,8,16,24,32,40,48,56]
 RIGHT_EDGES = [7,15,23,31,39,47,55,63]
+WHITE_PAWN_LOCATIONS = [8,9,10,11,12,13,14,15]
+BLACK_PAWN_LOCATIONS = [48,49,50,51,52,53,54,55]
 
 class GamePiece
     attr_accessor :color
@@ -139,6 +141,7 @@ class Game
             @turn.odd? ? self.get_user_input : self.get_computer_input
             self.clear_hints
             self.display_board
+            self.update_pawns
             @turn += 1
             game_over = self.game_ending?
         end
@@ -153,10 +156,41 @@ class Game
             self.get_computer_input
             self.clear_hints
             self.display_board
+            self.update_pawns
             @turn += 1
             game_over = self.game_ending?
         end
         puts "#{@winner.capitalize} wins!"
+    end
+
+    def update_pawns
+        pawns = get_unmoved_pawn_indexes()
+        for pawn in pawns[0] do
+            if !WHITE_PAWN_LOCATIONS.include? pawn
+                @game_board.grid[pawn][2].moved = true
+            end
+        end
+
+        for pawn in pawns[1] do
+            if !BLACK_PAWN_LOCATIONS.include? pawn
+                @game_board.grid[pawn][2].moved = true
+            end
+        end
+    end
+
+    def get_unmoved_pawn_indexes
+        white_pawn_index = []
+        black_pawn_index = []
+        @game_board.grid.each_with_index { |item, index|
+            if item[2].instance_of? Pawn
+                if item[2].color == "white" && item[2].moved == false
+                    white_pawn_index.push(index)
+                elsif item[2].color == "black" && item[2].moved == false
+                    black_pawn_index.push(index)
+                end
+            end
+        }
+        return [white_pawn_index, black_pawn_index]
     end
 
     def start_pvp_game
@@ -167,6 +201,7 @@ class Game
             self.get_user_input
             self.clear_hints
             self.display_board
+            self.update_pawns
             @turn += 1
             game_over = self.game_ending?
         end
@@ -199,14 +234,13 @@ class Game
     def get_computer_input
         eligible_movements = self.find_eligible_computer_movements
         random_movement = get_random_movement(eligible_movements)
-        puts "movement selection: #{random_movement}"
         if random_movement.nil?
             return
         end
         self.display_eligible_moves([@game_board.grid[random_movement[0]][2], random_movement[0]])
-        sleep(1)
+        sleep(3)
         self.display_board
-        sleep(1)
+        sleep(3)
         self.move_piece(random_movement[0], random_movement[1])
     end
 
@@ -858,7 +892,7 @@ class Game
             if is_spot_empty?(move1) && is_spot_empty?(move2)
                 @game_board.grid[move1][2] = "0"
                 @game_board.grid[move2][2] = "0"
-            elsif is_spot_empty?(move1) && !is_spot_empty?(move2)
+            elsif is_spot_empty?(move1)
                 @game_board.grid[move1][2] = "0"
             end
         else
